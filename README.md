@@ -1,6 +1,7 @@
 <p align="center">
 </p>
 <p align="center">
+    [![DepShield Badge](https://depshield.sonatype.org/badges/sonatype-nexus-community/ahab/depshield.svg)](https://depshield.github.io)
     <a href="https://travis-ci.org/sonatype-nexus-community/ahab"><img src="https://travis-ci.org/sonatype-nexus-community/ahab.svg?branch=master" alt="Build Status"></img></a>
 </p>
 

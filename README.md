@@ -3,8 +3,9 @@
 <p align="center">
     <a href="https://travis-ci.org/sonatype-nexus-community/ahab"><img src="https://travis-ci.org/sonatype-nexus-community/ahab.svg?branch=master" alt="Build Status"></img></a>
 </p>
-
-[![DepShield Badge](https://depshield.sonatype.org/badges/sonatype-nexus-community/ahab/depshield.svg)](https://depshield.github.io)
+<p align="center">
+    <a href="https://depshield.github.io"><img src="https://depshield.sonatype.org/badges/sonatype-nexus-community/ahab/depshield.svg" alt="DepShield Badge"></img></a>
+</p>
 
 # Ahab
 

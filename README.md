@@ -1,4 +1,5 @@
 <p align="center">
+    <img src="https://github.com/sonatype-nexus-community/ahab/blob/master/docs/images/ahab.png" width="350"/>
 </p>
 <p align="center">
     <a href="https://travis-ci.org/sonatype-nexus-community/ahab"><img src="https://travis-ci.org/sonatype-nexus-community/ahab.svg?branch=master" alt="Build Status"></img></a>

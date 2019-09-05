@@ -1,0 +1,41 @@
+if: tag IS blank
+sudo: false
+language: go
+go:
+- 1.11.x
+before_install:
+- export VERSION=$(git describe --abbrev=0 --tags) && export LAST_PREFIX=$(cut -d'.'
+  -f1,2 <<< $VERSION) && export LAST_SUFFIX=$(cut -d'.' -f3 <<< $VERSION) && export
+  NEW_SUFFIX=$(expr "$LAST_SUFFIX" + 1) && export VERSION="$LAST_PREFIX.$NEW_SUFFIX"
+install:
+- go mod download
+script:
+- go test ./... -v
+- GOOS=linux GOARCH=amd64 go build -ldflags="-X 'github.com/sonatype-nexus-community/ahab/buildversion.BuildVersion=$VERSION'
+  -X 'github.com/sonatype-nexus-community/ahab/buildversion.BuildTime=$time' -X 'github.com/sonatype-nexus-community/ahab/buildversion.BuildCommit=$TRAVIS_COMMIT'"
+  -o ahab-linux.amd64-$VERSION
+- GOOS=darwin GOARCH=amd64 go build -ldflags="-X 'github.com/sonatype-nexus-community/ahab/buildversion.BuildVersion=$VERSION'
+  -X 'github.com/sonatype-nexus-community/ahab/buildversion.BuildTime=$time' -X 'github.com/sonatype-nexus-community/ahab/buildversion.BuildCommit=$TRAVIS_COMMIT'"
+  -o ahab-darwin.amd64-$VERSION
+- GOOS=windows GOARCH=amd64 go build -ldflags="-X 'github.com/sonatype-nexus-community/ahab/buildversion.BuildVersion=$VERSION'
+  -X 'github.com/sonatype-nexus-community/ahab/buildversion.BuildTime=$time' -X 'github.com/sonatype-nexus-community/ahab/buildversion.BuildCommit=$TRAVIS_COMMIT'"
+  -o ahab-windows.amd64-$VERSION.exe
+
+env:
+- GO111MODULE=on
+before_deploy:
+- export TRAVIS_TAG=$VERSION
+deploy:
+  provider: releases
+  api_key:
+    secure: YC3okDQqwPnbOUpWpnJcOD8rDwKMNQbtsU0+6S6xb3gdp5p/WeUVoOqd12jA3QXsB/gTunmLZdGTtjRO1kkH3j0Y1HjdwgMCJNvxHjy/mba1AltVmZcN+m6tSQEiDh+c3DgOKV0W3n3qhdUaCSlu+Zy8gN6VtuGvp0I93otsDG+GSIXEYh7yR+Y9ySoQZ7O9Uw85clLn+mphown+K8UjzTEZKG2QqmYK3+hGFInVMohvto3Y1bo3N4A8t98+xVa2i8+zVkh5I2FwQoynh0LlxwTIgg400cMRpblFuqikLV5TukeR2LVABXPCvpgSHxO0uHvyJbAgYYnCgcXZa2C6nxmJto1dWWtJdelfM81VzzoxVIv7+QrlLcIdhecNVzFGfOzDu2XOdb3XBfS6AfK3ikMVmP+MfBNRi5VeJKecufmRBrNWUNsIbh/OiBW3Tfma48Ms6jTxWQReions4lHcW62idrEKBZ9TlkjkgJH5kwYHKgeqYkUGheo0eVaof2vnp49mcLk26SOUOhNCElE97eDhKwCsz5RxuQ2COL/bthfwwhb3/x/C33gRJu8S3ywyOW3hIygU7DFnyLoq7iig6Qo1cGEnUjahL8An4aQRviiOgR5vqKnWPIK1dlwR8jNrsPUjDAO9YQFlmQzlqqmJ3kxdG3RdCoDbePE9nYv1L0w=
+  file: 
+    - ahab-linux.amd64-$VERSION
+    - ahab-darwin.amd64-$VERSION
+    - ahab-windows.amd64-$VERSION.exe
+  on:
+    repo: sonatype-nexus-community/ahab
+    all_branches: true
+    condition: $TRAVIS_BRANCH = master && $TRAVIS_PULL_REQUEST = "false"
+  skip_cleanup: true
+  name: $VERSION

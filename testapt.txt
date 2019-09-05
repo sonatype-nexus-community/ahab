@@ -1,0 +1,11 @@
+Listing... Done                                                                                                                                        
+wget/now 1.19.1-3build1 amd64 [installed,local]                                                                                                         
+adduser/now 3.116ubuntu1 all [installed,local]                                                                                                         
+apparmor/now 2.12-4ubuntu5.1 amd64 [installed,local]                                                                                                   
+apt/now 1.6.10 amd64 [installed,local]                                                                                                                 
+apt-utils/now 1.6.10 amd64 [installed,local]                                                                                                           
+base-files/now 10.1ubuntu2.4 amd64 [installed,local]                                                                                                   
+base-passwd/now 3.5.44 amd64 [installed,local]                                                                                                         
+bash/now 4.4.18-2ubuntu1 amd64 [installed,local]                                                                                                       
+bsdutils/now 1:2.31.1-0.4ubuntu3.3 amd64 [installed,local]                                                                                             
+btrfs-progs/now 4.15.1-1build1 amd64 [installed,local]                                                                                                 

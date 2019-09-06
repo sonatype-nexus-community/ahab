@@ -14,7 +14,7 @@
 
 To use `ahab`, assuming you have a built version of it:
 
-* `apt list --install | ./ahab chase`
+* `apt list --installed | ./ahab chase`
 * `yum list installed | ./ahab chase --os fedora`
 
 `ahab` currently works for images that use `apt` or `yum` for package management.

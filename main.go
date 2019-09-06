@@ -28,7 +28,7 @@ import (
 
 func main() {
 	chaseCommand := flag.NewFlagSet("chase", flag.ExitOnError)
-	whalesPtr := chaseCommand.String("whales", "", "A comma seperated list of packages to parse")
+	whalesPtr := chaseCommand.String("whales", "", "A comma separated list of packages to parse")
 	packagePtr := chaseCommand.String("os", "debian", "Your target operating system")
 
 	args := os.Args[1:]

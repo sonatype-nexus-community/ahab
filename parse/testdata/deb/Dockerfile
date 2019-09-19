@@ -28,7 +28,3 @@ VOLUME /data
 
 #USER nobody
 WORKDIR /data
-
-RUN ls -alh
-
-#RUN apt list --installed | ./ahab chase

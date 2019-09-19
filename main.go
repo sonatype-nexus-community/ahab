@@ -86,7 +86,7 @@ func tryParseStdInList(list []string, operating *string) {
 }
 
 func tryAuditPackages(purls []string, count int) {
-	fmt.Print(purls)
+	//fmt.Print(purls)
 	coordinates, err := ossindex.AuditPackages(purls)
 	if err != nil {
 		fmt.Print(err)

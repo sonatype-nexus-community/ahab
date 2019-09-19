@@ -19,7 +19,7 @@ import (
 	"regexp"
 	"strings"
 
-	types "github.com/sonatype-nexus-community/nancy/types"
+	"github.com/sonatype-nexus-community/nancy/types"
 )
 
 func ParseAptListFromStdIn(stdin []string) (projectList types.ProjectList) {
@@ -45,7 +45,7 @@ func doAptParseStdIn(pkg string) (parsedProject types.Projects) {
 	pkg = strings.TrimSpace(pkg)
 	splitPackage := strings.Split(pkg, " ")
 	parsedProject.Name = strings.Split(splitPackage[0], "/")[0]
-	parsedProject.Version = doParseAptVersionIntoPurl(splitPackage[1])
+	parsedProject.Version = doParseAptVersionIntoPurl(splitPackage[0], splitPackage[1])
 	return
 }
 
@@ -53,18 +53,35 @@ func doAptParse(pkg string) (parsedProject types.Projects) {
 	pkg = strings.TrimSpace(pkg)
 	splitPackage := strings.Split(pkg, " ")
 	parsedProject.Name = splitPackage[0]
-	parsedProject.Version = doParseAptVersionIntoPurl(splitPackage[1])
+	parsedProject.Version = doParseAptVersionIntoPurl(splitPackage[0], splitPackage[1])
 	return
 }
 
-func doParseAptVersionIntoPurl(version string) (newVersion string) {
+func doParseAptVersionIntoPurl(name string, version string) (newVersion string) {
+	// exclude prefix delimited by :, and drop suffixes after .
 	re, err := regexp.Compile(`^([0-9]+:)?(([0-9]+)\.([0-9]+)(\.([0-9]+))?)`)
 	if err != nil {
 		fmt.Println(err)
 	}
 	newSlice := re.FindStringSubmatch(version)
-	fmt.Println(newSlice)
-	newVersion = newSlice[2]
+	if newSlice != nil {
+		newVersion = newSlice[2]
+	} else {
+		// first approach failed, second attempt:
+		// use prefix up to the first alphabetic character
+		reNumericPrefix, err := regexp.Compile(`([^a-zA-Z]+)?`)
+		if err != nil {
+			fmt.Println(err)
+		}
+		numberPrefix := reNumericPrefix.FindStringSubmatch(version)
+		if numberPrefix != nil {
+			newVersion = numberPrefix[1]
+		} else {
+			// yikes, nothing we recognize. fallback to taking the string as is.
+			fmt.Printf("package name: %s, using fallback value for version: %s\n", name, version)
+			newVersion = version
+		}
+	}
 	return
 }
 
@@ -79,6 +96,6 @@ func doDpkgParse(pkg string) (parsedProject types.Projects) {
 	pkg = strings.TrimSpace(pkg)
 	splitPackage := strings.Split(pkg, " ")
 	parsedProject.Name = splitPackage[0]
-	parsedProject.Version = splitPackage[1]
+	parsedProject.Version = doParseAptVersionIntoPurl(splitPackage[0], splitPackage[1])
 	return
 }

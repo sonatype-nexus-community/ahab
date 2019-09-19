@@ -36,7 +36,7 @@ func TestParseAptList(t *testing.T) {
 
 // generate CLI package list via:
 // # dpkg-query --show --showformat='${Package} ${Version}\n'
-var dpkgList string = `adduser 3.116ubuntu1
+var dpkgList = `adduser 3.116ubuntu1
 apt 1.6.12
 base-files 10.1ubuntu2.6
 base-passwd 3.5.44
@@ -265,10 +265,35 @@ var dpkgListArray = strings.Split(dpkgList, "\n")
 func TestParseDpkgList(t *testing.T) {
 	result := ParseDpkgList(dpkgListArray)
 
-	assert.Equal(t, types.Projects{"adduser", "3.116ubuntu1"}, result.Projects[0])
+	// adduser 3.116ubuntu1
+	assert.Equal(t, types.Projects{"adduser", "3.116"}, result.Projects[0])
+
+	// apt 1.6.12
 	assert.Equal(t, types.Projects{"apt", "1.6.12"}, result.Projects[1])
-	assert.Equal(t, types.Projects{"diffutils", "1:3.6-1"}, result.Projects[20])
-	assert.Equal(t, types.Projects{"vim", "2:8.0.1453-1ubuntu1.1"}, result.Projects[216])
-	assert.Equal(t, types.Projects{"xz-utils", "5.2.2-1.3"}, result.Projects[221])
-	assert.Equal(t, types.Projects{"zlib1g", "1:1.2.11.dfsg-0ubuntu2"}, result.Projects[222])
+
+	// ca-certificates 20180409
+	assert.Equal(t, types.Projects{"ca-certificates", "20180409"}, result.Projects[11])
+
+	// @todo Is the resulting version correct for this case?
+	// diffutils 1:3.6-1
+	assert.Equal(t, types.Projects{"diffutils", "3.6"}, result.Projects[20])
+
+	// libsystemd0 237-3ubuntu10.29
+	assert.Equal(t, types.Projects{"libsystemd0", "237-3"}, result.Projects[162])
+
+	// libudev1 237-3ubuntu10.29
+	assert.Equal(t, types.Projects{"libudev1", "237-3"}, result.Projects[167])
+
+	// tar 1.29b-2ubuntu0.1
+	assert.Equal(t, types.Projects{"tar", "1.29"}, result.Projects[211])
+
+	// vim 2:8.0.1453-1ubuntu1.1
+	assert.Equal(t, types.Projects{"vim", "8.0.1453"}, result.Projects[216])
+
+	// @todo Is the resulting version correct for this case?
+	// xz-utils 5.2.2-1.3
+	assert.Equal(t, types.Projects{"xz-utils", "5.2.2"}, result.Projects[221])
+
+	// zlib1g 1:1.2.11.dfsg-0ubuntu2`
+	assert.Equal(t, types.Projects{"zlib1g", "1.2.11"}, result.Projects[222])
 }

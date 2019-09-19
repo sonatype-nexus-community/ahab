@@ -67,3 +67,18 @@ func doParseAptVersionIntoPurl(version string) (newVersion string) {
 	newVersion = newSlice[2]
 	return
 }
+
+func ParseDpkgList(packages []string) (projectList types.ProjectList) {
+	for _, pkg := range packages {
+		projectList.Projects = append(projectList.Projects, doDpkgParse(pkg))
+	}
+	return
+}
+
+func doDpkgParse(pkg string) (parsedProject types.Projects) {
+	pkg = strings.TrimSpace(pkg)
+	splitPackage := strings.Split(pkg, " ")
+	parsedProject.Name = splitPackage[0]
+	parsedProject.Version = splitPackage[1]
+	return
+}

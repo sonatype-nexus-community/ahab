@@ -75,7 +75,8 @@ func tryParseStdInList(list []string, operating *string) {
 	thing = *operating
 	if thing == "debian" {
 		var aptResult packages.Apt
-		aptResult.ProjectList = parse.ParseAptListFromStdIn(list)
+		//aptResult.ProjectList = parse.ParseAptListFromStdIn(list)
+		aptResult.ProjectList = parse.ParseDpkgList(list)
 		tryExtractAndAudit(aptResult, thing)
 	} else {
 		var yumResult packages.Yum

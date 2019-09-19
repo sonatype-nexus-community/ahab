@@ -294,6 +294,6 @@ func TestParseDpkgList(t *testing.T) {
 	// xz-utils 5.2.2-1.3
 	assert.Equal(t, types.Projects{"xz-utils", "5.2.2"}, result.Projects[221])
 
-	// zlib1g 1:1.2.11.dfsg-0ubuntu2`
+	// zlib1g 1:1.2.11.dfsg-0ubuntu2
 	assert.Equal(t, types.Projects{"zlib1g", "1.2.11"}, result.Projects[222])
 }

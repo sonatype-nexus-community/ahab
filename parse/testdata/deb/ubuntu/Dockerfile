@@ -1,5 +1,5 @@
 # Usage: From project root directory:
-# $ docker build --tag ahab-deb -f parse/testdata/deb/Dockerfile  .
+# $ docker build --tag ahab-deb -f parse/testdata/deb/ubuntu/Dockerfile  .
 # $ docker run -it ahab-deb /bin/bash
 #
 # From inside running docker container shell:
@@ -11,20 +11,13 @@
 FROM ubuntu:latest
 
 RUN apt-get update
-#RUN apt-get upgrade -y
-
 RUN apt-get install -y software-properties-common
 RUN add-apt-repository -y ppa:longsleep/golang-backports
 RUN apt-get update
 RUN apt-get install -y golang-go vim
 
-#RUN ./script_to_install_ahab.sh
-
 COPY ./ /data
-
-#RUN chown -R nobody /data/*
 
 VOLUME /data
 
-#USER nobody
 WORKDIR /data

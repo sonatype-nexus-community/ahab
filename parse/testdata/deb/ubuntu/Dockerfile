@@ -1,6 +1,6 @@
 # Usage: From project root directory:
 # $ docker build --tag ahab-deb -f parse/testdata/deb/ubuntu/Dockerfile  .
-# $ docker run -it ahab-deb /bin/bash
+# $ docker run -it ahab-deb
 #
 # From inside running docker container shell:
 # # go build

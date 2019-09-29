@@ -25,7 +25,9 @@ import (
 func ParseAptListFromStdIn(stdin []string) (projectList types.ProjectList) {
 	for _, pkg := range stdin {
 
-		if strings.TrimSpace(pkg) == "Listing... Done" {
+		if strings.Contains(pkg, "Done") {
+			log.Println("Found end of line of Apt Install List")
+		} else if strings.Contains(pkg, "Listing...") {
 			log.Println("Found beginning line of Apt Install List")
 		} else {
 			projectList.Projects = append(projectList.Projects, doAptParseStdIn(pkg))
@@ -63,6 +65,7 @@ func doParseAptVersionIntoPurl(name string, version string) (newVersion string) 
 	if err != nil {
 		fmt.Println(err)
 	}
+	fmt.Println(">>>>" + version)
 	newSlice := re.FindStringSubmatch(version)
 	if newSlice != nil {
 		newVersion = newSlice[2]

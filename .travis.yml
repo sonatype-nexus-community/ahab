@@ -17,9 +17,6 @@ script:
 - GOOS=darwin GOARCH=amd64 go build -ldflags="-X 'github.com/sonatype-nexus-community/ahab/buildversion.BuildVersion=$VERSION'
   -X 'github.com/sonatype-nexus-community/ahab/buildversion.BuildTime=$time' -X 'github.com/sonatype-nexus-community/ahab/buildversion.BuildCommit=$TRAVIS_COMMIT'"
   -o ahab-darwin.amd64-$VERSION
-- GOOS=windows GOARCH=amd64 go build -ldflags="-X 'github.com/sonatype-nexus-community/ahab/buildversion.BuildVersion=$VERSION'
-  -X 'github.com/sonatype-nexus-community/ahab/buildversion.BuildTime=$time' -X 'github.com/sonatype-nexus-community/ahab/buildversion.BuildCommit=$TRAVIS_COMMIT'"
-  -o ahab-windows.amd64-$VERSION.exe
 
 env:
 - GO111MODULE=on

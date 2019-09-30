@@ -14,6 +14,7 @@
 package parse
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"regexp"
@@ -25,8 +26,10 @@ import (
 func ParseYumListFromStdIn(stdin []string) (projectList types.ProjectList) {
 	for _, pkg := range stdin {
 
-		if strings.TrimSpace(pkg) == "Installed Packages" {
+		if strings.Contains(pkg, "Loaded plugins") {
 			log.Println("Found beginning line of Yum Install List")
+		} else if strings.Contains(pkg, "Installed Packages") {
+			log.Println("Found install header line of Yum Install List")
 		} else {
 			projectList.Projects = append(projectList.Projects, doYumParseStdIn(pkg))
 		}

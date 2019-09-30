@@ -31,7 +31,10 @@ func ParseYumListFromStdIn(stdin []string) (projectList types.ProjectList) {
 		} else if strings.Contains(pkg, "Installed Packages") {
 			log.Println("Found install header line of Yum Install List")
 		} else {
-			projectList.Projects = append(projectList.Projects, doYumParseStdIn(pkg))
+			parsedProject, err := doYumParseStdIn(pkg)
+			if err == nil {
+				projectList.Projects = append(projectList.Projects, parsedProject)
+			}
 		}
 	}
 	return
@@ -39,24 +42,35 @@ func ParseYumListFromStdIn(stdin []string) (projectList types.ProjectList) {
 
 func ParseYumList(packages []string) (projectList types.ProjectList) {
 	for _, pkg := range packages {
-		projectList.Projects = append(projectList.Projects, doYumParse(pkg))
+		parsedProject, err := doYumParse(pkg)
+		if err == nil {
+			projectList.Projects = append(projectList.Projects, parsedProject)
+		}
 	}
 	return
 }
 
-func doYumParseStdIn(pkg string) (parsedProject types.Projects) {
+func doYumParseStdIn(pkg string) (parsedProject types.Projects, err error) {
 	pkg = strings.TrimSpace(pkg)
 	splitPackage := strings.Fields(pkg)
+	newVersion, err := doParseYumVersionIntoPurl(splitPackage[1])
+	if err != nil {
+		return parsedProject, err
+	}
 	parsedProject.Name = doParseYumName(splitPackage[0])
-	parsedProject.Version = doParseYumVersionIntoPurl(splitPackage[1])
+	parsedProject.Version = newVersion
 	return
 }
 
-func doYumParse(pkg string) (parsedProject types.Projects) {
+func doYumParse(pkg string) (parsedProject types.Projects, err error) {
 	pkg = strings.TrimSpace(pkg)
 	splitPackage := strings.Split(pkg, " ")
+	newVersion, err := doParseYumVersionIntoPurl(splitPackage[1])
+	if err != nil {
+		return parsedProject, err
+	}
 	parsedProject.Name = doParseYumName(splitPackage[0])
-	parsedProject.Version = doParseYumVersionIntoPurl(splitPackage[1])
+	parsedProject.Version = newVersion
 	return
 }
 
@@ -66,12 +80,18 @@ func doParseYumName(name string) (newName string) {
 	return
 }
 
-func doParseYumVersionIntoPurl(version string) (newVersion string) {
+func doParseYumVersionIntoPurl(version string) (newVersion string, err error) {
 	re, err := regexp.Compile(`^([0-9]+[:-])?(([0-9]+)(\.([0-9]+))?(\.([0-9]+))?)`)
 	if err != nil {
 		fmt.Println(err)
 	}
+	fmt.Println(">>>>" + version)
 	newSlice := re.FindStringSubmatch(version)
-	newVersion = newSlice[2]
-	return
+	fmt.Println(newSlice)
+	if len(newSlice) >= 3 {
+		newVersion = newSlice[2]
+		return newVersion, nil
+	}else{
+		return newVersion, errors.New(fmt.Sprintf("Version of %s is not semVer", newSlice))
+	}
 }

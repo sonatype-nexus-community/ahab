@@ -29,7 +29,8 @@ import (
 func main() {
 	chaseCommand := flag.NewFlagSet("chase", flag.ExitOnError)
 	whalesPtr := chaseCommand.String("whales", "", "A comma separated list of packages to parse")
-	packagePtr := chaseCommand.String("os", "debian", "Your target operating system")
+	packagePtr := chaseCommand.String("os", "debian", "Your target operating system (Deprecated. See -autodetect)")
+	autoDetectPtr := chaseCommand.Bool("autodetect", false, "Enables auto detections of the package manager you have installed. Eventually this will be on by default.")
 
 	args := os.Args[1:]
 
@@ -40,16 +41,16 @@ func main() {
 
 	switch args[0] {
 	case "chase":
-		parseChaseCommandArgs(chaseCommand, whalesPtr, packagePtr)
+		parseChaseCommandArgs(chaseCommand, whalesPtr, packagePtr, autoDetectPtr)
 	}
 }
 
-func parseChaseCommandArgs(command *flag.FlagSet, flag *string, operating *string) {
+func parseChaseCommandArgs(command *flag.FlagSet, flag *string, operating *string, autoDetectPtr *bool) {
 	command.Parse(os.Args[2:])
 
 	if command.Parsed() {
 		if *flag == "" {
-			tryParseStdIn(operating)
+			tryParseStdIn(operating, autoDetectPtr)
 		} else {
 			tryParseFlag(flag, operating)
 		}
@@ -70,9 +71,19 @@ func tryExtractAndAudit(pkgs packages.IPackage, operating string) {
 	tryAuditPackages(purls, len(purls))
 }
 
-func tryParseStdInList(list []string, operating *string) {
+func tryParseStdInList(list []string, operating *string, autoDetect *bool) {
 	var thing string
 	thing = *operating
+
+	if *autoDetect == true {
+		detected, err := packages.DetectPackageManager()
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			thing = detected
+		}
+	}
+
 	switch thing {
 	case "debian":
 		var aptResult packages.Apt
@@ -99,7 +110,7 @@ func tryAuditPackages(purls []string, count int) {
 	}
 }
 
-func tryParseStdIn(operating *string) {
+func tryParseStdIn(operating *string, autoDetectPtr *bool) {
 	fi, err := os.Stdin.Stat()
 	if err != nil {
 		panic(err)
@@ -107,11 +118,11 @@ func tryParseStdIn(operating *string) {
 	if (fi.Mode() & os.ModeNamedPipe) == 0 {
 		os.Exit(1)
 	} else {
-		doRead(operating)
+		doRead(operating, autoDetectPtr)
 	}
 }
 
-func doRead(operating *string) {
+func doRead(operating *string, autoDetectPtr *bool) {
 	var list []string
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
@@ -122,5 +133,5 @@ func doRead(operating *string) {
 			panic(err)
 		}
 	}
-	tryParseStdInList(list, operating)
+	tryParseStdInList(list, operating, autoDetectPtr)
 }

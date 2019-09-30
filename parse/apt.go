@@ -14,7 +14,6 @@
 package parse
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"regexp"

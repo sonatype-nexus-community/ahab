@@ -43,6 +43,23 @@ func TestSuccessfullyBuildYumDockerWithAhab(t *testing.T) {
 	}
 }
 
+func TestSuccessfullyBuildYumWithAutoDetectDockerWithAhab(t *testing.T) {
+	_, goStatus := runCommand("go", "build", "-o", "ahab", "../main.go")
+	defer os.Remove("ahab")
+	if goStatus == false {
+		t.Error("Could not build ahab")
+		return
+	}
+
+	output, status := runCommand("docker", "build", "-f", "yum-autodetect/Dockerfile", ".")
+	if status == false {
+		if !strings.Contains(output, "Audited dependencies:"){
+			t.Error("Docker build for yum failed and was not due to vulnerable packages. See test output for more details.")
+			return
+		}
+	}
+}
+
 func runCommand(command string, args ...string) (output string, status bool){
 	cmd := exec.Command(command, args...)
 	cmd.Env = os.Environ()

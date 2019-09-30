@@ -14,7 +14,7 @@
 
 To use `ahab`, assuming you have a built version of it:
 
-* `apt list --installed | ./ahab chase`
+* `dpkg-query --show --showformat='${Package} ${Version}\n' | ./ahab chase`
 * `yum list installed | ./ahab chase --os fedora`
 
 `ahab` currently works for images that use `apt` or `yum` for package management.
@@ -24,7 +24,7 @@ To use `ahab`, assuming you have a built version of it:
 Well, we'd hope it is easy enough to see why, but what you can do with `ahab` is inject a command similar to the following in your `Dockerfile`:
 
 ```
-    RUN apt list --installed | ahab chase
+    RUN dpkg-query --show --showformat='${Package} ${Version}\n' | ./ahab chase
 ```
 
 Since `ahab` will exit with a non zero code if vulnerabilities are found, you can use `ahab` to prevent images with vulnerabilities from being built, serving as a gate in your CI/CD process. `ahab` does not replace checking your own applications for vulnerable dependencies, etc..., but as the container has become more and more important to how an application eventually ends up in Production, checking that base image itself is critical as well.
@@ -38,7 +38,7 @@ RUN apt-get update && apt-get install pip
 
 RUN ./script_to_install_ahab.sh
 
-RUN apt list --installed | ahab chase
+RUN dpkg-query --show --showformat='${Package} ${Version}\n' | ./ahab chase
 ```
 
 Using this base image, you'd install all the packages necessary to run your application, and check it as a last step with `ahab` to ensure you aren't using anything vulnerable. From here, you'd use this base image to import your application, build it, etc... as you normally would, knowing you started from a clean base.

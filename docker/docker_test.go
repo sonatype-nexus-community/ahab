@@ -21,7 +21,7 @@ func TestDockerIntegration(t *testing.T) {
 	tests := map[string]struct {
 		expectedDockerfile string
 	}{
-		"apt":                  {expectedDockerfile: "apt/Dockerfile"},
+		"dpkg-query":           {expectedDockerfile: "dpkg-query/Dockerfile"},
 		"yum":                  {expectedDockerfile: "yum/Dockerfile"},
 		"yum using autodetect": {expectedDockerfile: "yum-autodetect/Dockerfile"},
 	}

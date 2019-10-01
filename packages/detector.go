@@ -33,7 +33,7 @@ func DetectPackageManager(verbose ...bool) (string, error) {
 		os = "notdebian"
 		return os, nil
 	}
-	installed = determineIfPackageManagerInstalled("apt", beChatty)
+	installed = determineIfPackageManagerInstalled("dpkg-query", beChatty)
 	if installed {
 		os = "debian"
 		return os, nil

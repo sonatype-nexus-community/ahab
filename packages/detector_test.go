@@ -33,7 +33,7 @@ func fakeExecCommand(command string, args ...string) *exec.Cmd {
 
 func TestHelperProcess(t *testing.T) {
 	fmt.Println(">>> TEST PROCESS <<<<")
-	if os.Getenv("GO_WANT_HELPER_PROCESS") == "notinstalled" || os.Getenv("GO_WANT_HELPER_PROCESS") == "yuminstalled" || os.Getenv("GO_WANT_HELPER_PROCESS") == "aptinstalled" {
+	if os.Getenv("GO_WANT_HELPER_PROCESS") == "notinstalled" || os.Getenv("GO_WANT_HELPER_PROCESS") == "yuminstalled" || os.Getenv("GO_WANT_HELPER_PROCESS") == "dpkgqueryinstalled" {
 		expectedProgram := os.Args[4]
 		if os.Getenv("GO_WANT_HELPER_PROCESS") == "notinstalled" {
 			fmt.Println(">>> NOT INSTALLED CODE ... ALWAYS RETURN 1 <<<<")
@@ -47,13 +47,13 @@ func TestHelperProcess(t *testing.T) {
 				fmt.Fprintln(os.Stdout, ">>> YUM CODE : ASKING FOR SOMETHING ELSE ... ITS NOT INSTALLED <<<<")
 				os.Exit(1)
 			}
-		} else if os.Getenv("GO_WANT_HELPER_PROCESS") == "aptinstalled" {
-			fmt.Println(">>> APT CODE <<<<")
-			if expectedProgram == "apt" {
-				fmt.Fprintln(os.Stdout, ">>> APT CODE : ASKING FOR APT ... ITS INSTALLED <<<<")
+		} else if os.Getenv("GO_WANT_HELPER_PROCESS") == "dpkgqueryinstalled" {
+			fmt.Println(">>> DKPG-QUERY CODE <<<<")
+			if expectedProgram == "dpkg-query" {
+				fmt.Fprintln(os.Stdout, ">>> DKPG-QUERY CODE : ASKING FOR APT ... ITS INSTALLED <<<<")
 				os.Exit(0)
 			} else {
-				fmt.Fprintln(os.Stdout, ">>> APT CODE : ASKING FOR SOMETHING ELSE ... ITS NOT INSTALLED <<<<")
+				fmt.Fprintln(os.Stdout, ">>> DKPG-QUERY CODE : ASKING FOR SOMETHING ELSE ... ITS NOT INSTALLED <<<<")
 				os.Exit(1)
 			}
 		}
@@ -70,7 +70,7 @@ func TestDetectPackageManager(t *testing.T) {
 		expectedErr                     error
 	}{
 		"yum":               {expectedInstalledPackageManager: "yuminstalled", expectedResult: "notdebian", expectedErr: nil},
-		"apt":               {expectedInstalledPackageManager: "aptinstalled", expectedResult: "debian", expectedErr: nil},
+		"dpkg-query":        {expectedInstalledPackageManager: "dpkgqueryinstalled", expectedResult: "debian", expectedErr: nil},
 		"neither installed": {expectedInstalledPackageManager: "notinstalled", expectedResult: "", expectedErr: errors.New("supported package managers are apt or yum, could not find either")},
 	}
 

@@ -6,4 +6,5 @@ COPY ahab .
 
 # Spit out these just for easier debugging
 RUN yum list installed
+
 RUN yum list installed | ./ahab chase -os centos

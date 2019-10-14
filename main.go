@@ -73,12 +73,16 @@ func tryExtractAndAudit(pkgs packages.IPackage, operating string) {
 func tryParseStdInList(list []string, operating *string) {
 	var thing string
 	thing = *operating
-	if thing == "debian" {
+	switch thing {
+	case "debian":
 		var aptResult packages.Apt
-		//aptResult.ProjectList = parse.ParseAptListFromStdIn(list)
 		aptResult.ProjectList = parse.ParseDpkgList(list)
 		tryExtractAndAudit(aptResult, thing)
-	} else {
+	case "alpine":
+		var apkResult packages.Apk
+		apkResult.ProjectList = parse.ParseApkShow(list)
+		tryExtractAndAudit(apkResult, thing)
+	default:
 		var yumResult packages.Yum
 		yumResult.ProjectList = parse.ParseYumListFromStdIn(list)
 		tryExtractAndAudit(yumResult, thing)
@@ -86,7 +90,7 @@ func tryParseStdInList(list []string, operating *string) {
 }
 
 func tryAuditPackages(purls []string, count int) {
-	//fmt.Print(purls)
+	fmt.Println(purls)
 	coordinates, err := ossindex.AuditPackages(purls)
 	if err != nil {
 		fmt.Print(err)

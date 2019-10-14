@@ -16,8 +16,9 @@ To use `ahab`, assuming you have a built version of it:
 
 * `dpkg-query --show --showformat='${Package} ${Version}\n' | ./ahab chase`
 * `yum list installed | ./ahab chase --os fedora`
+* `apk info -vv | sort | ./ahab chase --os alpine`
 
-`ahab` currently works for images that use `apt` or `yum` for package management.
+`ahab` currently works for images that use `apt`, `apk` or `yum` for package management.
 
 ## Why is this useful?
 

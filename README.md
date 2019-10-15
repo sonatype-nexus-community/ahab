@@ -53,21 +53,22 @@ This project is called `ahab` as like the wild captain, it will kill the creatio
 
 At current time you have a few options:
 
-TBD
-
 ### Build from source
-
-TBD
 
 ```
 $ export GO111MODULE=on
 $ go test ./...
-$ go build
+$ go build -o ahab
 ```
 
 ### Download release binary
 
-TBD
+Each commit to master creates a new release binary, and if you'd like to skip building from source, you can download a binary similar to:
+
+```
+$ curl -O /path/where/you/want/ahab \
+  https://github.com/sonatype-nexus-community/ahab/releases/download/v0.0.6/ahab-darwin.amd64-v0.0.6
+```
 
 ## Development
 

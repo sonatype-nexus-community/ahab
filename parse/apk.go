@@ -14,7 +14,6 @@
 package parse
 
 import (
-	"fmt"
 	"regexp"
 	"strings"
 
@@ -42,7 +41,7 @@ func doApkShowParse(pkg string) (parsedProject types.Projects) {
 func doApkShowParseName(pkg string) (name string) {
 	re, err := regexp.Compile("([a-zA-Z][a-zA-Z0-9]+-)+")
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 	}
 	results := re.FindStringSubmatch(pkg)
 	if results != nil {
@@ -54,7 +53,7 @@ func doApkShowParseName(pkg string) (name string) {
 func doApkShowParseVersion(pkg string) (version string) {
 	re, err := regexp.Compile("([0-9]+)(\\.[0-9]+)(\\.[0-9]+)?(-[r][0-9]+)")
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 	}
 	results := re.FindStringSubmatch(pkg)
 	if results != nil {

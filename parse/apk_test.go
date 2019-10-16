@@ -22,18 +22,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestParseApkShow(t *testing.T) {
-	var list []string
-	list = append(list, "alpine-baselayout-3.1.2-r0 - Alpine base dir structure and init scripts")
-	list = append(list, "alpine-keys-2.1-r2 - Public keys for Alpine Linux packages")
-	list = append(list, "apk-tools-2.10.4-r2 - Alpine Package Keeper - package manager for alpine")
-	result := ParseApkShow(list)
-
-	if len(result.Projects) != 3 {
-		t.Errorf("Didn't work")
-	}
-}
-
 // generate CLI package list via:
 // # apk info -vv | sort
 var apkShowList = `WARNING: Ignoring APKINDEX.00740ba1.tar.gz: No such file or directory
@@ -57,6 +45,10 @@ var apkShowArray = strings.Split(apkShowList, "\n")
 
 func TestParseApkShowList(t *testing.T) {
 	result := ParseApkShow(apkShowArray)
+
+	if len(result.Projects) != 14 {
+		t.Errorf("Didn't work, expected %d projects but got %d", 14, len(result.Projects))
+	}
 
 	// adduser 3.116ubuntu1
 	assert.Equal(t, types.Projects{"alpine-baselayout", "3.1.2-r0"}, result.Projects[0])

@@ -22,8 +22,7 @@ import (
 
 func ParseApkShow(packages []string) (projectList types.ProjectList) {
 	for _, pkg := range packages {
-		if strings.Contains(pkg, "WARNING") {
-		} else {
+		if !strings.Contains(pkg, "WARNING") {
 			projectList.Projects = append(projectList.Projects, doApkShowParse(pkg))
 		}
 	}

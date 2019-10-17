@@ -43,6 +43,19 @@ RUN dpkg-query --show --showformat='${Package} ${Version}\n' | ./ahab chase
 
 Using this base image, you'd install all the packages necessary to run your application, and check it as a last step with `ahab` to ensure you aren't using anything vulnerable. From here, you'd use this base image to import your application, build it, etc... as you normally would, knowing you started from a clean base.
 
+### See it work in Docker!
+
+In this repo we have a Dockerfile that will copy in `ahab`, and run it on Ubuntu, to illustrate a failing Docker build.
+
+To run this test:
+
+```
+$ GOOS=linux GOARCH=amd64 go build 
+$ docker build . -t test
+```
+
+You should see `ahab` run and fail the Docker build, due to some vulnerabilities in the base os packages (Ubuntu in this case)!
+
 ## Why Ahab?
 
 [Captain Ahab](https://en.wikipedia.org/wiki/Captain_Ahab) was a person hell bent on killing a white whale. 

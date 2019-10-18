@@ -50,12 +50,12 @@ func TestParseApkShowList(t *testing.T) {
 		t.Errorf("Didn't work, expected %d projects but got %d", 14, len(result.Projects))
 	}
 
-	// adduser 3.116ubuntu1
-	assert.Equal(t, types.Projects{"alpine-baselayout", "3.1.2-r0"}, result.Projects[0])
+	// alpine-baselayout-3.1.2-r0
+	assert.Equal(t, types.Projects{"alpine-baselayout", "3.1.2"}, result.Projects[0])
 
-	// apt 1.6.12
-	assert.Equal(t, types.Projects{"alpine-keys", "2.1-r2"}, result.Projects[1])
+	// alpine-keys-2.1-r2
+	assert.Equal(t, types.Projects{"alpine-keys", "2.1"}, result.Projects[1])
 
-	// ca-certificates 20180409
-	assert.Equal(t, types.Projects{"apk-tools", "2.10.4-r2"}, result.Projects[2])
+	// apk-tools-2.10.4-r2
+	assert.Equal(t, types.Projects{"apk-tools", "2.10.4"}, result.Projects[2])
 }

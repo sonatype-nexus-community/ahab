@@ -14,6 +14,7 @@
 package parse
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 
@@ -32,31 +33,16 @@ func ParseApkShow(packages []string) (projectList types.ProjectList) {
 func doApkShowParse(pkg string) (parsedProject types.Projects) {
 	pkg = strings.TrimSpace(pkg)
 	splitPackage := strings.Split(pkg, " ")
-	parsedProject.Name = doApkShowParseName(splitPackage[0])
-	parsedProject.Version = doApkShowParseVersion(splitPackage[0])
-	return
-}
-
-func doApkShowParseName(pkg string) (name string) {
-	re, err := regexp.Compile("([a-zA-Z][a-zA-Z0-9]+-)+")
+	re, err := regexp.Compile(`^((.*)-([^a-zA-Z].*)-.*)`)
 	if err != nil {
 		panic(err)
 	}
-	results := re.FindStringSubmatch(pkg)
-	if results != nil {
-		name = strings.TrimSuffix(results[0], "-")
-	}
-	return
-}
-
-func doApkShowParseVersion(pkg string) (version string) {
-	re, err := regexp.Compile("([0-9]+)(\\.[0-9]+)(\\.[0-9]+)?(-[r][0-9]+)")
-	if err != nil {
-		panic(err)
-	}
-	results := re.FindStringSubmatch(pkg)
-	if results != nil {
-		version = results[0]
+	newSlice := re.FindStringSubmatch(splitPackage[0])
+	if newSlice != nil {
+		parsedProject.Name = newSlice[2]
+		parsedProject.Version = newSlice[3]
+	} else {
+		fmt.Printf("Failure parsing name, version for package")
 	}
 	return
 }

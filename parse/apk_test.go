@@ -58,4 +58,7 @@ func TestParseApkShowList(t *testing.T) {
 
 	// apk-tools-2.10.4-r2
 	assert.Equal(t, types.Projects{"apk-tools", "2.10.4"}, result.Projects[2])
+
+	// ca-certificates-cacert-20190108-r0
+	assert.Equal(t, types.Projects{"ca-certificates-cacert", "20190108"}, result.Projects[4])
 }

@@ -66,8 +66,7 @@ $ go build -o ahab
 Each commit to master creates a new release binary, and if you'd like to skip building from source, you can download a binary similar to:
 
 ```
-$ curl -O /path/where/you/want/ahab \
-  https://github.com/sonatype-nexus-community/ahab/releases/download/v0.0.6/ahab-darwin.amd64-v0.0.6
+$ curl -o /path/where/you/want/ahab -O -L https://github.com/sonatype-nexus-community/ahab/releases/download/v0.0.7/ahab-linux.amd64-v0.0.7
 ```
 
 ## Development

@@ -17,6 +17,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"github.com/logrusorgru/aurora"
 	"os"
 	"strings"
 
@@ -29,8 +30,7 @@ import (
 func main() {
 	chaseCommand := flag.NewFlagSet("chase", flag.ExitOnError)
 	whalesPtr := chaseCommand.String("whales", "", "A comma separated list of packages to parse")
-	packagePtr := chaseCommand.String("os", "debian", "Your target operating system (Deprecated. See -autodetect)")
-	autoDetectPtr := chaseCommand.Bool("autodetect", false, "Enables auto detections of the package manager you have installed. Eventually this will be on by default.")
+	packagePtr := chaseCommand.String("os", "", "Your target operating system (Deprecated. This is now automatically done. There should be no need to pass this in. Flag will be removed in a later release)")
 
 	args := os.Args[1:]
 
@@ -41,16 +41,16 @@ func main() {
 
 	switch args[0] {
 	case "chase":
-		parseChaseCommandArgs(chaseCommand, whalesPtr, packagePtr, autoDetectPtr)
+		parseChaseCommandArgs(chaseCommand, whalesPtr, packagePtr)
 	}
 }
 
-func parseChaseCommandArgs(command *flag.FlagSet, flag *string, operating *string, autoDetectPtr *bool) {
+func parseChaseCommandArgs(command *flag.FlagSet, flag *string, operating *string) {
 	command.Parse(os.Args[2:])
 
 	if command.Parsed() {
 		if *flag == "" {
-			tryParseStdIn(operating, autoDetectPtr)
+			tryParseStdIn(operating)
 		} else {
 			tryParseFlag(flag, operating)
 		}
@@ -71,17 +71,19 @@ func tryExtractAndAudit(pkgs packages.IPackage, operating string) {
 	tryAuditPackages(purls, len(purls))
 }
 
-func tryParseStdInList(list []string, operating *string, autoDetect *bool) {
+func tryParseStdInList(list []string, operating *string) {
 	var thing string
 	thing = *operating
 
-	if *autoDetect == true {
+	if *operating == "" {
 		detected, err := packages.DetectPackageManager()
 		if err != nil {
 			fmt.Println(err)
 		} else {
 			thing = detected
 		}
+	}else{
+		fmt.Println(aurora.Red("!!!!!!!!! Deprecated : OS flag will eventually be removed. Auto detection of which os/package manager is available on the system is enabled by default. !!!!!!!!!"))
 	}
 
 	switch thing {
@@ -110,7 +112,7 @@ func tryAuditPackages(purls []string, count int) {
 	}
 }
 
-func tryParseStdIn(operating *string, autoDetectPtr *bool) {
+func tryParseStdIn(operating *string) {
 	fi, err := os.Stdin.Stat()
 	if err != nil {
 		panic(err)
@@ -118,11 +120,11 @@ func tryParseStdIn(operating *string, autoDetectPtr *bool) {
 	if (fi.Mode() & os.ModeNamedPipe) == 0 {
 		os.Exit(1)
 	} else {
-		doRead(operating, autoDetectPtr)
+		doRead(operating)
 	}
 }
 
-func doRead(operating *string, autoDetectPtr *bool) {
+func doRead(operating *string) {
 	var list []string
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
@@ -133,5 +135,5 @@ func doRead(operating *string, autoDetectPtr *bool) {
 			panic(err)
 		}
 	}
-	tryParseStdInList(list, operating, autoDetectPtr)
+	tryParseStdInList(list, operating)
 }

@@ -7,4 +7,4 @@ COPY ahab .
 # Spit out these just for easier debugging
 RUN yum list installed
 
-RUN yum list installed | ./ahab chase -autodetect=true
+RUN yum list installed | ./ahab chase

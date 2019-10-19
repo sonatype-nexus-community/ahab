@@ -85,9 +85,7 @@ func doParseYumVersionIntoPurl(version string) (newVersion string, err error) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(">>>>" + version)
 	newSlice := re.FindStringSubmatch(version)
-	fmt.Println(newSlice)
 	if len(newSlice) >= 3 {
 		newVersion = newSlice[2]
 		return newVersion, nil

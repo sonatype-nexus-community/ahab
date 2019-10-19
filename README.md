@@ -29,6 +29,7 @@ To use `ahab`, assuming you have a built version of it:
 * `dpkg-query --show --showformat='${Package} ${Version}\n' | ./ahab chase`
 * `yum list installed | ./ahab chase`
 * `apk info -vv | sort | ./ahab chase`
+* `./ahab chase -whales "packagename version,packagename2 version2,..."`
 
 `ahab` currently works for images that use `apt`, `apk` or `yum` for package management.
 

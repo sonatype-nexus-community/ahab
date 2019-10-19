@@ -12,11 +12,23 @@
 
 `ahab` is a tool to check for vulnerabilities in your apt or yum powered operating systems, powered by [Sonatype OSS Index](https://ossindex.sonatype.org/).
 
+
+## Usage
+
+```
+ ~ > ahab chase --help
+Usage of chase:
+  -os string
+    	Your target operating system (Deprecated. This is now automatically done. There should be no need to pass this in. Flag will be removed in a later release)
+  -whales string
+    	A comma separated list of packages to parse
+```
+
 To use `ahab`, assuming you have a built version of it:
 
 * `dpkg-query --show --showformat='${Package} ${Version}\n' | ./ahab chase`
-* `yum list installed | ./ahab chase --os fedora`
-* `apk info -vv | sort | ./ahab chase --os alpine`
+* `yum list installed | ./ahab chase`
+* `apk info -vv | sort | ./ahab chase`
 
 `ahab` currently works for images that use `apt`, `apk` or `yum` for package management.
 

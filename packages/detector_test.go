@@ -71,7 +71,7 @@ func TestDetectPackageManager(t *testing.T) {
 	}{
 		"yum":               {expectedInstalledPackageManager: "yuminstalled", expectedResult: "notdebian", expectedErr: nil},
 		"dpkg-query":        {expectedInstalledPackageManager: "dpkgqueryinstalled", expectedResult: "debian", expectedErr: nil},
-		"neither installed": {expectedInstalledPackageManager: "notinstalled", expectedResult: "", expectedErr: errors.New("supported package managers are apt or yum, could not find either")},
+		"neither installed": {expectedInstalledPackageManager: "notinstalled", expectedResult: "", expectedErr: errors.New(SupportedPackageManagers)},
 	}
 
 	for name, test := range tests {

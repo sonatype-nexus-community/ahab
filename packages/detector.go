@@ -23,6 +23,8 @@ import (
 
 var execCommand = exec.Command
 
+const SupportedPackageManagers = "supported package managers are apt or yum, could not find either"
+
 func DetectPackageManager(verbose ...bool) (string, error) {
 	var os string
 	beChatty := len(verbose) > 0 && verbose[0] == true
@@ -38,7 +40,7 @@ func DetectPackageManager(verbose ...bool) (string, error) {
 		os = "debian"
 		return os, nil
 	} else {
-		return os, errors.New("supported package managers are apt or yum, could not find either")
+		return os, errors.New(SupportedPackageManagers)
 	}
 }
 

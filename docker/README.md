@@ -11,8 +11,8 @@ GOOS=linux GOARCH=amd64 go build -o ahab ../main.go
 docker build -f yum/Dockerfile .
 ```
 
-### Apt
+### Dpkg-query
 ```
 GOOS=linux GOARCH=amd64 go build -o ahab ../main.go
-docker build -f apt/Dockerfile .
+docker build -f dpkg-query/Dockerfile .
 ```

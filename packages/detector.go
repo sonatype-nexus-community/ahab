@@ -23,7 +23,7 @@ import (
 
 var execCommand = exec.Command
 
-const SupportedPackageManagers = "supported package managers are apt or yum, could not find either"
+const SupportedPackageManagers = "Supported package managers are apt or yum, could not find either. Possible issues: 1.) dpkg-query or yum is not installed. 2.) 'which' program is not installed to do auto detection."
 
 func DetectPackageManager(verbose ...bool) (string, error) {
 	var os string

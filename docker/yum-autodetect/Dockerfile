@@ -1,6 +1,6 @@
 FROM centos:latest
 
-RUN yum -y install epel-release && yum -y install python3-pip
+RUN yum -y install epel-release which python3-pip
 
 COPY ahab .
 

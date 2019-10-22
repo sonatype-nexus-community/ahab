@@ -79,6 +79,7 @@ func tryParseStdInList(list []string, operating *string) {
 		detected, err := packages.DetectPackageManager()
 		if err != nil {
 			fmt.Println(err)
+			os.Exit(1)
 		} else {
 			thing = detected
 		}

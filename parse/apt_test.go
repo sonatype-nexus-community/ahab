@@ -44,30 +44,6 @@ func TestParseAptList(t *testing.T) {
 	}
 }
 
-func TestParseAptListFromStdIn(t *testing.T) {
-	var list []string
-	list = append(list, "Listing...")
-	list = append(list, "findutils/bionic,now 4.6.0+git+20170828-2 amd64 [installed]")
-	list = append(list, "debconf/bionic-updates,now 1.5.66ubuntu1 all [installed]")
-	list = append(list, "base-files/bionic-updates,now 10.1ubuntu2.6 amd64 [installed]")
-	list = append(list, "Done")
-	result := ParseAptListFromStdIn(list)
-
-	if len(result.Projects) != 3 {
-		t.Errorf("Didn't work")
-	}
-
-	if result.Projects[0].Name != "findutils" || result.Projects[0].Version != "4.6.0" {
-		t.Errorf("findutils dep did not match result. Actual %s", result.Projects[0])
-	}
-	if result.Projects[1].Name != "debconf" || result.Projects[1].Version != "1.5.66" {
-		t.Errorf("debconf dep did not match result. Actual %s", result.Projects[1])
-	}
-	if result.Projects[2].Name != "base-files" || result.Projects[2].Version != "10.1" {
-		t.Errorf("base-files dep did not match result. Actual %s", result.Projects[2])
-	}
-}
-
 // generate CLI package list via:
 // # dpkg-query --show --showformat='${Package} ${Version}\n'
 var dpkgList = `adduser 3.116ubuntu1

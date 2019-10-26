@@ -15,29 +15,11 @@ package parse
 
 import (
 	"fmt"
-	"log"
 	"regexp"
 	"strings"
 
 	"github.com/sonatype-nexus-community/nancy/types"
 )
-
-func ParseAptListFromStdIn(stdin []string) (projectList types.ProjectList) {
-	for _, pkg := range stdin {
-
-		if strings.Contains(pkg, "Done") {
-			log.Println("Found end of line of Apt Install List")
-		} else if strings.Contains(pkg, "Listing...") {
-			log.Println("Found beginning line of Apt Install List")
-		} else {
-			parsedProject, err := doAptParseStdIn(pkg)
-			if err == nil {
-				projectList.Projects = append(projectList.Projects, parsedProject)
-			}
-		}
-	}
-	return
-}
 
 func ParseAptList(packages []string) (projectList types.ProjectList) {
 	for _, pkg := range packages {
@@ -46,15 +28,6 @@ func ParseAptList(packages []string) (projectList types.ProjectList) {
 			projectList.Projects = append(projectList.Projects, parsedProject)
 		}
 	}
-	return
-}
-
-func doAptParseStdIn(pkg string) (parsedProject types.Projects, err error) {
-	pkg = strings.TrimSpace(pkg)
-	splitPackage := strings.Split(pkg, " ")
-	newVersion := doParseAptVersionIntoPurl(splitPackage[0], splitPackage[1])
-	parsedProject.Name = strings.Split(splitPackage[0], "/")[0]
-	parsedProject.Version = newVersion
 	return
 }
 

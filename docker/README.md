@@ -14,7 +14,7 @@ docker build -f yum/Dockerfile .
 ### APK
 ```
 GOOS=linux GOARCH=amd64 go build -o ahab ../main.go
-docker build -f apk/Dockerfile .
+docker build -f apk-autodetect/Dockerfile .
 ```
 
 ### Dpkg-query

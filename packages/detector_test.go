@@ -33,7 +33,10 @@ func fakeExecCommand(command string, args ...string) *exec.Cmd {
 
 func TestHelperProcess(t *testing.T) {
 	fmt.Println(">>> TEST PROCESS <<<<")
-	if os.Getenv("GO_WANT_HELPER_PROCESS") == "notinstalled" || os.Getenv("GO_WANT_HELPER_PROCESS") == "yuminstalled" || os.Getenv("GO_WANT_HELPER_PROCESS") == "dpkgqueryinstalled" {
+	if os.Getenv("GO_WANT_HELPER_PROCESS") == "notinstalled" ||
+		os.Getenv("GO_WANT_HELPER_PROCESS") == "yuminstalled" ||
+		os.Getenv("GO_WANT_HELPER_PROCESS") == "dpkgqueryinstalled" ||
+		os.Getenv("GO_WANT_HELPER_PROCESS") == "apkinstalled" {
 		expectedProgram := os.Args[4]
 		if os.Getenv("GO_WANT_HELPER_PROCESS") == "notinstalled" {
 			fmt.Println(">>> NOT INSTALLED CODE ... ALWAYS RETURN 1 <<<<")
@@ -56,6 +59,15 @@ func TestHelperProcess(t *testing.T) {
 				fmt.Fprintln(os.Stdout, ">>> DKPG-QUERY CODE : ASKING FOR SOMETHING ELSE ... ITS NOT INSTALLED <<<<")
 				os.Exit(1)
 			}
+		} else if os.Getenv("GO_WANT_HELPER_PROCESS") == "apkinstalled" {
+			fmt.Println(">>> APK CODE <<<<")
+			if expectedProgram == "apk" {
+				fmt.Fprintln(os.Stdout, ">>> APK CODE : ASKING FOR APK ... ITS INSTALLED <<<<")
+				os.Exit(0)
+			} else {
+				fmt.Fprintln(os.Stdout, ">>> APK CODE : ASKING FOR SOMETHING ELSE ... ITS NOT INSTALLED <<<<")
+				os.Exit(1)
+			}
 		}
 	} else {
 		fmt.Println(">>> RETURNING <<<<")
@@ -69,9 +81,10 @@ func TestDetectPackageManager(t *testing.T) {
 		expectedResult                  string
 		expectedErr                     error
 	}{
+		"apk":               {expectedInstalledPackageManager: "apkinstalled", expectedResult: "alpine", expectedErr: nil},
 		"yum":               {expectedInstalledPackageManager: "yuminstalled", expectedResult: "notdebian", expectedErr: nil},
 		"dpkg-query":        {expectedInstalledPackageManager: "dpkgqueryinstalled", expectedResult: "debian", expectedErr: nil},
-		"neither installed": {expectedInstalledPackageManager: "notinstalled", expectedResult: "", expectedErr: errors.New(SupportedPackageManagers)},
+		"none installed": {expectedInstalledPackageManager: "notinstalled", expectedResult: "", expectedErr: errors.New(SupportedPackageManagers)},
 	}
 
 	for name, test := range tests {

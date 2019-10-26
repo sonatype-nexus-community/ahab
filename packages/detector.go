@@ -23,13 +23,19 @@ import (
 
 var execCommand = exec.Command
 
-const SupportedPackageManagers = "Supported package managers are apt or yum, could not find either. Possible issues: 1.) dpkg-query or yum is not installed. 2.) 'which' program is not installed to do auto detection."
+const SupportedPackageManagers = "Supported package managers are dpkg-query, apk or yum, could not find any. Possible issues: 1.) dpkg-query, apk or yum is not installed. 2.) 'which' program is not installed to do auto detection."
 
 func DetectPackageManager(verbose ...bool) (string, error) {
 	var os string
 	beChatty := len(verbose) > 0 && verbose[0] == true
 
-	installed := determineIfPackageManagerInstalled("yum", beChatty)
+	installed := determineIfPackageManagerInstalled("apk", beChatty)
+	if installed {
+		//Having this be OS is a little weird. It probably should have been just package manager based flag.
+		os = "alpine"
+		return os, nil
+	}
+	installed = determineIfPackageManagerInstalled("yum", beChatty)
 	if installed {
 		//Having this be OS is a little weird. It probably should have been just package manager based flag.
 		os = "notdebian"

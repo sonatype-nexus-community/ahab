@@ -24,6 +24,7 @@ func TestDockerIntegration(t *testing.T) {
 		"dpkg-query":           {expectedDockerfile: "dpkg-query/Dockerfile"},
 		"yum":                  {expectedDockerfile: "yum/Dockerfile"},
 		"yum using autodetect": {expectedDockerfile: "yum-autodetect/Dockerfile"},
+		"apk using autodetect": {expectedDockerfile: "apk-autodetect/Dockerfile"},
 	}
 
 	for name, test := range tests {

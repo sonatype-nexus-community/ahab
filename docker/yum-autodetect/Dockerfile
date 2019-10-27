@@ -1,5 +1,7 @@
 FROM centos:latest
 
+WORKDIR /ahab-docker
+
 RUN yum -y install epel-release which python3-pip
 
 COPY ahab .

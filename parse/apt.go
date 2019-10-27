@@ -46,7 +46,6 @@ func doParseAptVersionIntoPurl(name string, version string) (newVersion string) 
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(">>>>" + version)
 	newSlice := re.FindStringSubmatch(version)
 	if newSlice != nil {
 		newVersion = newSlice[2]

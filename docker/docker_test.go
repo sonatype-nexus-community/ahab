@@ -11,13 +11,6 @@ import (
 )
 
 func TestDockerIntegration(t *testing.T) {
-	_, goStatus := runCommand("go", "build", "-o", "ahab", "../main.go")
-	defer os.Remove("ahab")
-	if goStatus == false {
-		t.Error("Could not build ahab")
-		return
-	}
-
 	tests := map[string]struct {
 		expectedDockerfile string
 	}{
@@ -26,18 +19,40 @@ func TestDockerIntegration(t *testing.T) {
 		"yum using autodetect": {expectedDockerfile: "yum-autodetect/Dockerfile"},
 		"apk using autodetect": {expectedDockerfile: "apk-autodetect/Dockerfile"},
 	}
+	t.Run("docker", func(t *testing.T) {
+		if setupSubtest(t) {
+			return
+		}
 
-	for name, test := range tests {
-		t.Run(name, func(t *testing.T) {
-			output, status := runCommand("docker", "build", "-f", test.expectedDockerfile, ".")
-			if status == false {
-				if !strings.Contains(output, "Audited dependencies:") {
-					t.Error("Docker build failed and was not due to vulnerable packages. See test output for more details.")
-					return
+		for name, test := range tests {
+			t.Run(name, func(t *testing.T) {
+				output, status := runCommand("docker", "build", "-f", test.expectedDockerfile, ".")
+				if status == false {
+					if !strings.Contains(output, "Audited dependencies:") {
+						t.Error("Docker build failed and was not due to vulnerable packages. See test output for more details.")
+						return
+					}
 				}
-			}
-		})
+			})
+		}
+
+		teardownSubtest()
+	})
+}
+
+func teardownSubtest() error {
+	fmt.Println("[TEARDOWN]")
+	return os.Remove("ahab")
+}
+
+func setupSubtest(t *testing.T) bool {
+	fmt.Println("[SETUP]")
+	_, goStatus := runCommand("go", "build", "-o", "ahab", "../main.go")
+	if goStatus == false {
+		t.Error("Could not build ahab")
+		return true
 	}
+	return false
 }
 
 func runCommand(command string, args ...string) (output string, status bool) {

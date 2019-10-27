@@ -8,17 +8,17 @@ Simply helps to validate that ahab behaves like it should.
 ### Yum
 ```
 GOOS=linux GOARCH=amd64 go build -o ahab ../main.go
-docker build -f yum/Dockerfile .
+docker build --no-cache -f yum/Dockerfile .
 ```
 
 ### APK
 ```
 GOOS=linux GOARCH=amd64 go build -o ahab ../main.go
-docker build -f apk-autodetect/Dockerfile .
+docker build --no-cache -f apk-autodetect/Dockerfile .
 ```
 
 ### Dpkg-query
 ```
 GOOS=linux GOARCH=amd64 go build -o ahab ../main.go
-docker build -f dpkg-query/Dockerfile .
+docker build --no-cache -f dpkg-query/Dockerfile .
 ```

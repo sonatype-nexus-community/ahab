@@ -33,7 +33,9 @@ func TestDockerIntegration(t *testing.T) {
 	t.Run("docker", func(t *testing.T) {
 		for name, test := range tests {
 			t.Run(name, func(t *testing.T) {
-				output, status := runCommand("docker", "build", "-f", test.expectedDockerfile, ".")
+				t.Parallel()
+				output, status := runCommand("docker", "build", "--no-cache", "-f", test.expectedDockerfile, ".")
+				t.Log(output)
 				if status == false {
 					if !strings.Contains(output, "Audited dependencies:") {
 						t.Error("Docker build failed and was not due to vulnerable packages. See test output for more details.")
@@ -72,7 +74,6 @@ func runCommand(command string, args ...string) (output string, status bool) {
 	var waitStatus syscall.WaitStatus
 	combinedOutput, err := cmd.CombinedOutput()
 	combinedOutputStr := string(combinedOutput)
-	fmt.Println(combinedOutputStr)
 	if err != nil {
 		os.Stderr.WriteString(fmt.Sprintf("Error: %s\n", err.Error()))
 		if exitError, ok := err.(*exec.ExitError); ok {

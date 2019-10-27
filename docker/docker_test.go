@@ -10,6 +10,17 @@ import (
 	"testing"
 )
 
+func TestMain(m *testing.M) {
+	if setupSubtest() {
+		os.Exit(222)
+	}
+	exitVal := m.Run()
+
+	teardownSubtest()
+
+	os.Exit(exitVal)
+}
+
 func TestDockerIntegration(t *testing.T) {
 	tests := map[string]struct {
 		expectedDockerfile string
@@ -20,10 +31,6 @@ func TestDockerIntegration(t *testing.T) {
 		"apk using autodetect": {expectedDockerfile: "apk-autodetect/Dockerfile"},
 	}
 	t.Run("docker", func(t *testing.T) {
-		if setupSubtest(t) {
-			return
-		}
-
 		for name, test := range tests {
 			t.Run(name, func(t *testing.T) {
 				output, status := runCommand("docker", "build", "-f", test.expectedDockerfile, ".")
@@ -35,8 +42,6 @@ func TestDockerIntegration(t *testing.T) {
 				}
 			})
 		}
-
-		teardownSubtest()
 	})
 }
 
@@ -45,11 +50,11 @@ func teardownSubtest() error {
 	return os.Remove("ahab")
 }
 
-func setupSubtest(t *testing.T) bool {
+func setupSubtest() bool {
 	fmt.Println("[SETUP]")
 	_, goStatus := runCommand("go", "build", "-o", "ahab", "../main.go")
 	if goStatus == false {
-		t.Error("Could not build ahab")
+		fmt.Println("Could not build ahab")
 		return true
 	}
 	return false

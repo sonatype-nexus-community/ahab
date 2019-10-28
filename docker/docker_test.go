@@ -32,8 +32,12 @@ func TestDockerIntegration(t *testing.T) {
 	}
 	t.Run("docker", func(t *testing.T) {
 		for name, test := range tests {
+			name := name
+			test := test
 			t.Run(name, func(t *testing.T) {
 				t.Parallel()
+				t.Log(">>>>>>>>>>>>>>",name)
+				t.Log(">>>>>>>>>>>>>>",test.expectedDockerfile)
 				output, status := runCommand("docker", "build", "--no-cache", "-f", test.expectedDockerfile, ".")
 				t.Log(output)
 				if status == false {

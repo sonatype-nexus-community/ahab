@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"runtime"
 	"strings"
 	"syscall"
 	"testing"
@@ -71,9 +70,6 @@ func runCommand(command string, args ...string) (output string, status bool) {
 	cmd.Env = os.Environ()
 	cmd.Env = append(cmd.Env, "GOOS=linux")
 	cmd.Env = append(cmd.Env, "GOARCH=amd64")
-	if runtime.GOOS == "darwin" {
-		cmd.Env = append(cmd.Env, "CGO_ENABLED=0")
-	}
 
 	var waitStatus syscall.WaitStatus
 	combinedOutput, err := cmd.CombinedOutput()

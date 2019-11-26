@@ -19,7 +19,7 @@ script:
   -o ahab-darwin.amd64-$VERSION
 
 env:
-- GO111MODULE=on
+- GO111MODULE=on CGO_ENABLED=0
 before_deploy:
 - export TRAVIS_TAG=$VERSION
 deploy:

@@ -2,9 +2,6 @@ FROM alpine:latest
 
 WORKDIR /ahab-docker
 
-#Requirement to run golang binary in apline
-RUN apk add --no-cache libc6-compat
-
 RUN apk add --no-cache python3
 
 COPY ahab .

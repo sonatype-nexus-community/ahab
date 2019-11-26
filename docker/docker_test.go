@@ -68,6 +68,7 @@ func setupSubtest() bool {
 func runCommand(command string, args ...string) (output string, status bool) {
 	cmd := exec.Command(command, args...)
 	cmd.Env = os.Environ()
+	cmd.Env = append(cmd.Env, "CGO_ENABLED=0")
 	cmd.Env = append(cmd.Env, "GOOS=linux")
 	cmd.Env = append(cmd.Env, "GOARCH=amd64")
 

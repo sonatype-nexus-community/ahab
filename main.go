@@ -108,7 +108,7 @@ func tryAuditPackages(purls []string, count int) {
 	if err != nil {
 		fmt.Print(err)
 	}
-	if count := audit.LogResults(true, count, coordinates); count > 0 {
+	if count := audit.LogResults(true, false, count, coordinates, []string{}); count > 0 {
 		os.Exit(1)
 	}
 }

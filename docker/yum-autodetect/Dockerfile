@@ -10,3 +10,4 @@ COPY ahab .
 RUN yum list installed
 
 RUN yum list installed | ./ahab chase
+

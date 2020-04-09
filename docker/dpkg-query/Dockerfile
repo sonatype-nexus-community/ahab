@@ -10,3 +10,4 @@ COPY ahab .
 RUN dpkg-query --show --showformat='${Package} ${Version}\n'
 
 RUN dpkg-query --show --showformat='${Package} ${Version}\n' | ./ahab chase
+

@@ -1,4 +1,5 @@
-// Copyright 2019 Sonatype Inc.
+//
+// Copyright 2019-Present Sonatype Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +12,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+
 package parse
 
 import (
@@ -18,11 +21,9 @@ import (
 	"log"
 	"regexp"
 	"strings"
-
-	types "github.com/sonatype-nexus-community/nancy/types"
 )
 
-func ParseYumListFromStdIn(stdin []string) (projectList types.ProjectList) {
+func ParseYumListFromStdIn(stdin []string) (projectList ProjectList) {
 	for _, pkg := range stdin {
 
 		if strings.TrimSpace(pkg) == "Installed Packages" {
@@ -34,14 +35,14 @@ func ParseYumListFromStdIn(stdin []string) (projectList types.ProjectList) {
 	return
 }
 
-func ParseYumList(packages []string) (projectList types.ProjectList) {
+func ParseYumList(packages []string) (projectList ProjectList) {
 	for _, pkg := range packages {
 		projectList.Projects = append(projectList.Projects, doYumParse(pkg))
 	}
 	return
 }
 
-func doYumParseStdIn(pkg string) (parsedProject types.Projects) {
+func doYumParseStdIn(pkg string) (parsedProject Projects) {
 	pkg = strings.TrimSpace(pkg)
 	splitPackage := strings.Fields(pkg)
 	parsedProject.Name = doParseYumName(splitPackage[0])
@@ -49,7 +50,7 @@ func doYumParseStdIn(pkg string) (parsedProject types.Projects) {
 	return
 }
 
-func doYumParse(pkg string) (parsedProject types.Projects) {
+func doYumParse(pkg string) (parsedProject Projects) {
 	pkg = strings.TrimSpace(pkg)
 	splitPackage := strings.Split(pkg, " ")
 	parsedProject.Name = doParseYumName(splitPackage[0])

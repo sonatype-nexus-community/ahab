@@ -1,4 +1,5 @@
-// Copyright 2019 Sonatype Inc.
+//
+// Copyright 2019-Present Sonatype Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,22 +12,20 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+
 package parse
 
 import (
 	"fmt"
-	"log"
 	"regexp"
 	"strings"
-
-	"github.com/sonatype-nexus-community/nancy/types"
 )
 
-func ParseAptListFromStdIn(stdin []string) (projectList types.ProjectList) {
+func ParseAptListFromStdIn(stdin []string) (projectList ProjectList) {
 	for _, pkg := range stdin {
-
 		if strings.TrimSpace(pkg) == "Listing... Done" {
-			log.Println("Found beginning line of Apt Install List")
+			fmt.Print("Found beginning line of Apt Install List")
 		} else {
 			projectList.Projects = append(projectList.Projects, doAptParseStdIn(pkg))
 		}
@@ -34,14 +33,14 @@ func ParseAptListFromStdIn(stdin []string) (projectList types.ProjectList) {
 	return
 }
 
-func ParseAptList(packages []string) (projectList types.ProjectList) {
+func ParseAptList(packages []string) (projectList ProjectList) {
 	for _, pkg := range packages {
 		projectList.Projects = append(projectList.Projects, doAptParse(pkg))
 	}
 	return
 }
 
-func doAptParseStdIn(pkg string) (parsedProject types.Projects) {
+func doAptParseStdIn(pkg string) (parsedProject Projects) {
 	pkg = strings.TrimSpace(pkg)
 	splitPackage := strings.Split(pkg, " ")
 	parsedProject.Name = strings.Split(splitPackage[0], "/")[0]
@@ -49,7 +48,7 @@ func doAptParseStdIn(pkg string) (parsedProject types.Projects) {
 	return
 }
 
-func doAptParse(pkg string) (parsedProject types.Projects) {
+func doAptParse(pkg string) (parsedProject Projects) {
 	pkg = strings.TrimSpace(pkg)
 	splitPackage := strings.Split(pkg, " ")
 	parsedProject.Name = splitPackage[0]
@@ -85,14 +84,14 @@ func doParseAptVersionIntoPurl(name string, version string) (newVersion string) 
 	return
 }
 
-func ParseDpkgList(packages []string) (projectList types.ProjectList) {
+func ParseDpkgList(packages []string) (projectList ProjectList) {
 	for _, pkg := range packages {
 		projectList.Projects = append(projectList.Projects, doDpkgParse(pkg))
 	}
 	return
 }
 
-func doDpkgParse(pkg string) (parsedProject types.Projects) {
+func doDpkgParse(pkg string) (parsedProject Projects) {
 	pkg = strings.TrimSpace(pkg)
 	splitPackage := strings.Split(pkg, " ")
 	parsedProject.Name = splitPackage[0]

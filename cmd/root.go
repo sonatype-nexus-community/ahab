@@ -14,22 +14,33 @@
 // limitations under the License.
 //
 
-package packages
+package cmd
 
 import (
 	"fmt"
+	"os"
 
-	"github.com/sonatype-nexus-community/ahab/parse"
+	"github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 )
 
-type Yum struct {
-	ProjectList parse.ProjectList
+var (
+	verbose int
+	logger  *logrus.Logger
+)
+
+var rootCmd = &cobra.Command{
+	Use:   "ahab",
+	Short: "ahab is a tool for scanning linux OS packages for vulnerabilities",
+	Run: func(cmd *cobra.Command, args []string) {
+		printHeader()
+		cmd.Usage()
+	},
 }
 
-func (y Yum) ExtractPurlsFromProjectList(operating string) (purls []string) {
-	for _, s := range y.ProjectList.Projects {
-		var purl = fmt.Sprintf("pkg:rpm/%s@%s", s.Name, s.Version)
-		purls = append(purls, purl)
+func Execute() {
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
-	return
 }

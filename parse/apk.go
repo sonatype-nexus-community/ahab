@@ -1,4 +1,5 @@
-// Copyright 2019 Sonatype Inc.
+//
+// Copyright 2019-Present Sonatype Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,17 +12,17 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+
 package parse
 
 import (
 	"fmt"
 	"regexp"
 	"strings"
-
-	"github.com/sonatype-nexus-community/nancy/types"
 )
 
-func ParseApkShow(packages []string) (projectList types.ProjectList) {
+func ParseApkShow(packages []string) (projectList ProjectList) {
 	for _, pkg := range packages {
 		if !strings.Contains(pkg, "WARNING") {
 			projectList.Projects = append(projectList.Projects, doApkShowParse(pkg))
@@ -30,7 +31,7 @@ func ParseApkShow(packages []string) (projectList types.ProjectList) {
 	return
 }
 
-func doApkShowParse(pkg string) (parsedProject types.Projects) {
+func doApkShowParse(pkg string) (parsedProject Projects) {
 	pkg = strings.TrimSpace(pkg)
 	splitPackage := strings.Split(pkg, " ")
 	re, err := regexp.Compile(`^((.*)-([^a-zA-Z].*)-.*)`)

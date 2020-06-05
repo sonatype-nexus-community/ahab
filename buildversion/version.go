@@ -14,22 +14,11 @@
 // limitations under the License.
 //
 
-package packages
+package buildversion
 
-import (
-	"fmt"
-
-	"github.com/sonatype-nexus-community/ahab/parse"
+var (
+	// these are overwritten/populated via build CLI
+	BuildVersion = "development"
+	BuildTime    = ""
+	BuildCommit  = ""
 )
-
-type Yum struct {
-	ProjectList parse.ProjectList
-}
-
-func (y Yum) ExtractPurlsFromProjectList(operating string) (purls []string) {
-	for _, s := range y.ProjectList.Projects {
-		var purl = fmt.Sprintf("pkg:rpm/%s@%s", s.Name, s.Version)
-		purls = append(purls, purl)
-	}
-	return
-}

@@ -20,7 +20,6 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/common-nighthawk/go-figure"
@@ -35,7 +34,6 @@ import (
 )
 
 var (
-	whales        string
 	operating     string
 	cleanCache    bool
 	ossIndexUser  string
@@ -47,11 +45,25 @@ var (
 	ossi          *ossindex.Server
 )
 
+func init() {
+	rootCmd.AddCommand(chaseCmd)
+	chaseCmd.PersistentFlags().StringVar(&operating, "os", "debian", "")
+	chaseCmd.PersistentFlags().BoolVar(&cleanCache, "clean-cache", false, "")
+	chaseCmd.PersistentFlags().StringVar(&ossIndexUser, "user", "", "")
+	chaseCmd.PersistentFlags().StringVar(&ossIndexToken, "token", "", "")
+	chaseCmd.PersistentFlags().StringVar(&output, "output", "text", "")
+	chaseCmd.PersistentFlags().BoolVar(&loud, "loud", false, "")
+	chaseCmd.PersistentFlags().BoolVar(&quiet, "quiet", false, "")
+	chaseCmd.PersistentFlags().BoolVar(&noColor, "no-color", false, "")
+	chaseCmd.PersistentFlags().CountVarP(&verbose, "", "v", "Set log level, higher is more verbose")
+}
+
 var chaseCmd = &cobra.Command{
 	Use:   "chase",
 	Short: "chase is used for auditing projects with OSS Index",
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		logger = logrus.New()
+
 		switch verbose {
 		case 1:
 			logger.Level = logrus.InfoLevel
@@ -72,6 +84,7 @@ var chaseCmd = &cobra.Command{
 				Username:    ossIndexUser,
 				Token:       ossIndexToken,
 			})
+
 		if output == "text" && !quiet {
 			printHeader()
 		}
@@ -86,46 +99,35 @@ var chaseCmd = &cobra.Command{
 			return
 		}
 
-		if whales != "" {
-			logger.WithField("packages", whales).Trace("Attempting to audit list of strings from command line")
-			tryParseFlag(&whales, &operating)
-		} else {
-			logger.Trace("Attempting to audit list of strings from standard in")
-			tryParseStdIn(&operating)
+		logger.Trace("Attempting to audit list of strings from standard in")
+		pkgs, err := parseStdIn(&operating)
+		if err != nil {
+			logger.Error(err)
+			return
 		}
+
+		logger.Trace("Attempting to extract purls from Project List")
+		purls := pkgs.ExtractPurlsFromProjectList(operating)
+
+		logger.Trace("Attempting to Audit Packages with OSS Index")
+		coordinates, err := ossi.AuditPackages(purls)
+		if err != nil {
+			logger.Error(err)
+			return
+		}
+
+		logger.Trace("Attempting to output audited packages results")
+		count, results := audit.LogResults(quiet, noColor, loud, output, coordinates)
+		fmt.Print(results)
+		if count > 0 {
+			os.Exit(1)
+		}
+
 		return
 	},
 }
 
-func init() {
-	rootCmd.AddCommand(chaseCmd)
-	chaseCmd.PersistentFlags().StringVar(&whales, "whales", "", "")
-	chaseCmd.PersistentFlags().StringVar(&operating, "os", "debian", "")
-	chaseCmd.PersistentFlags().BoolVar(&cleanCache, "clean-cache", false, "")
-	chaseCmd.PersistentFlags().StringVar(&ossIndexUser, "user", "", "")
-	chaseCmd.PersistentFlags().StringVar(&ossIndexToken, "token", "", "")
-	chaseCmd.PersistentFlags().StringVar(&output, "output", "text", "")
-	chaseCmd.PersistentFlags().BoolVar(&loud, "loud", false, "")
-	chaseCmd.PersistentFlags().BoolVar(&quiet, "quiet", false, "")
-	chaseCmd.PersistentFlags().BoolVar(&noColor, "no-color", false, "")
-	chaseCmd.PersistentFlags().CountVarP(&verbose, "", "v", "Set log level, higher is more verbose")
-}
-
-func tryParseFlag(flag *string, operating *string) {
-	whales := strings.Split(*flag, ",")
-	var aptResult packages.Apt
-	aptResult.ProjectList = parse.ParseAptList(whales)
-	var thing string
-	thing = *operating
-	tryExtractAndAudit(aptResult, thing)
-}
-
-func tryExtractAndAudit(pkgs packages.IPackage, operating string) {
-	purls := pkgs.ExtractPurlsFromProjectList(operating)
-	tryAuditPackages(purls, len(purls))
-}
-
-func tryParseStdInList(list []string, operating *string) {
+func parseStdInList(list []string, operating *string) (packages.IPackage, error) {
 	var thing string
 	thing = *operating
 	switch thing {
@@ -133,47 +135,29 @@ func tryParseStdInList(list []string, operating *string) {
 		logger.Trace("Chasing Debian")
 		var aptResult packages.Apt
 		aptResult.ProjectList = parse.ParseDpkgList(list)
-		tryExtractAndAudit(aptResult, thing)
+		return aptResult, nil
 	case "alpine":
 		logger.Trace("Chasing Alpine")
 		var apkResult packages.Apk
 		apkResult.ProjectList = parse.ParseApkShow(list)
-		tryExtractAndAudit(apkResult, thing)
+		return apkResult, nil
 	default:
 		logger.Trace("Chasing Yum")
 		var yumResult packages.Yum
 		yumResult.ProjectList = parse.ParseYumListFromStdIn(list)
-		tryExtractAndAudit(yumResult, thing)
+		return yumResult, nil
 	}
 }
 
-func tryAuditPackages(purls []string, count int) {
-	coordinates, err := ossi.AuditPackages(purls)
-	if err != nil {
-		logger.Error(err)
-	}
-	logger.Trace(coordinates)
-	count, results := audit.LogResults(quiet, noColor, loud, output, coordinates)
-	fmt.Print(results)
-	if count > 0 {
-		os.Exit(1)
-	}
-	os.Exit(0)
-}
-
-func tryParseStdIn(operating *string) {
+func parseStdIn(operating *string) (packages.IPackage, error) {
 	fi, err := os.Stdin.Stat()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	if (fi.Mode() & os.ModeNamedPipe) == 0 {
-		os.Exit(1)
-	} else {
-		doRead(operating)
+		return nil, fmt.Errorf("Nothing passed in to Standard In")
 	}
-}
 
-func doRead(operating *string) {
 	var list []string
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
@@ -181,10 +165,10 @@ func doRead(operating *string) {
 	}
 	if err := scanner.Err(); err != nil {
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 	}
-	tryParseStdInList(list, operating)
+	return parseStdInList(list, operating)
 }
 
 func printHeader() {

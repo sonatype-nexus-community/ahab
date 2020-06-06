@@ -120,7 +120,6 @@ func outputText(quiet bool, noColor bool, loud bool, projects []types.Coordinate
 
 	w := tabwriter.NewWriter(&sb, 9, 3, 0, '\t', 0)
 	w.Flush()
-	var numVulnerable int
 
 	nonVulnerablePackages, vulnerablePackages := splitPackages(projects)
 
@@ -131,7 +130,7 @@ func outputText(quiet bool, noColor bool, loud bool, projects []types.Coordinate
 	t.SetTitle("Summary")
 	t.AppendRow([]interface{}{"Audited Dependencies", strconv.Itoa(len(projects))})
 	t.AppendSeparator()
-	t.AppendRow([]interface{}{"Vulnerable Dependencies", au.Bold(au.Red(strconv.Itoa(numVulnerable)))})
+	t.AppendRow([]interface{}{"Vulnerable Dependencies", au.Bold(au.Red(strconv.Itoa(len(vulnerablePackages))))})
 	sb.WriteString(t.Render())
 
 	return len(vulnerablePackages), sb.String()

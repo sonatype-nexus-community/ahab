@@ -154,9 +154,11 @@ func tryAuditPackages(purls []string, count int) {
 	}
 	logger.Trace(coordinates)
 	count, results := audit.LogResults(quiet, noColor, loud, output, coordinates)
-	logger.Trace(count)
-	logger.Trace(results)
 	fmt.Print(results)
+	if count > 0 {
+		os.Exit(1)
+	}
+	os.Exit(0)
 }
 
 func tryParseStdIn(operating *string) {

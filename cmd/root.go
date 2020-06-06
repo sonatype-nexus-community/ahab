@@ -26,7 +26,7 @@ import (
 
 var (
 	verbose int
-	logger  *logrus.Logger
+	logLady *logrus.Logger
 )
 
 var rootCmd = &cobra.Command{

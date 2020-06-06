@@ -26,6 +26,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/sonatype-nexus-community/ahab/audit"
 	"github.com/sonatype-nexus-community/ahab/buildversion"
+	"github.com/sonatype-nexus-community/ahab/logger"
 	"github.com/sonatype-nexus-community/ahab/packages"
 	"github.com/sonatype-nexus-community/ahab/parse"
 	"github.com/sonatype-nexus-community/go-sona-types/ossindex"
@@ -62,20 +63,12 @@ var chaseCmd = &cobra.Command{
 	Use:   "chase",
 	Short: "chase is used for auditing projects with OSS Index",
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
-		logger = logrus.New()
-
-		switch verbose {
-		case 1:
-			logger.Level = logrus.InfoLevel
-		case 2:
-			logger.Level = logrus.DebugLevel
-		case 3:
-			logger.Level = logrus.TraceLevel
-		default:
-			logger.Level = logrus.ErrorLevel
+		logLady, err = getLogger(verbose)
+		if err != nil {
+			return
 		}
 
-		ossi = ossindex.New(logger,
+		ossi = ossindex.New(logLady,
 			types.Options{
 				DBCacheName: "ahab-cache",
 				TTL:         time.Now().Local().Add(time.Hour * 12),
@@ -92,31 +85,31 @@ var chaseCmd = &cobra.Command{
 		if cleanCache {
 			err = ossi.NoCacheNoProblems()
 			if err != nil {
-				logger.Error(err)
+				logLady.Error(err)
 				return
 			}
-			logger.Trace("Cleaned Ahab Cache")
+			logLady.Trace("Cleaned Ahab Cache")
 			return
 		}
 
-		logger.Trace("Attempting to audit list of strings from standard in")
+		logLady.Trace("Attempting to audit list of strings from standard in")
 		pkgs, err := parseStdIn(&operating)
 		if err != nil {
-			logger.Error(err)
+			logLady.Error(err)
 			return
 		}
 
-		logger.Trace("Attempting to extract purls from Project List")
+		logLady.Trace("Attempting to extract purls from Project List")
 		purls := pkgs.ExtractPurlsFromProjectList(operating)
 
-		logger.Trace("Attempting to Audit Packages with OSS Index")
+		logLady.Trace("Attempting to Audit Packages with OSS Index")
 		coordinates, err := ossi.AuditPackages(purls)
 		if err != nil {
-			logger.Error(err)
+			logLady.Error(err)
 			return
 		}
 
-		logger.Trace("Attempting to output audited packages results")
+		logLady.Trace("Attempting to output audited packages results")
 		count, results := audit.LogResults(quiet, noColor, loud, output, coordinates)
 		fmt.Print(results)
 		if count > 0 {
@@ -127,22 +120,35 @@ var chaseCmd = &cobra.Command{
 	},
 }
 
+func getLogger(level int) (*logrus.Logger, error) {
+	switch level {
+	case 1:
+		return logger.GetLogger(logrus.InfoLevel)
+	case 2:
+		return logger.GetLogger(logrus.DebugLevel)
+	case 3:
+		return logger.GetLogger(logrus.TraceLevel)
+	default:
+		return logger.GetLogger(logrus.ErrorLevel)
+	}
+}
+
 func parseStdInList(list []string, operating *string) (packages.IPackage, error) {
 	var thing string
 	thing = *operating
 	switch thing {
 	case "debian":
-		logger.Trace("Chasing Debian")
+		logLady.Trace("Chasing Debian")
 		var aptResult packages.Apt
 		aptResult.ProjectList = parse.ParseDpkgList(list)
 		return aptResult, nil
 	case "alpine":
-		logger.Trace("Chasing Alpine")
+		logLady.Trace("Chasing Alpine")
 		var apkResult packages.Apk
 		apkResult.ProjectList = parse.ParseApkShow(list)
 		return apkResult, nil
 	default:
-		logger.Trace("Chasing Yum")
+		logLady.Trace("Chasing Yum")
 		var yumResult packages.Yum
 		yumResult.ProjectList = parse.ParseYumListFromStdIn(list)
 		return yumResult, nil

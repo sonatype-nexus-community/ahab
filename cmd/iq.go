@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/sirupsen/logrus"
 	"github.com/sonatype-nexus-community/ahab/buildversion"
 	"github.com/sonatype-nexus-community/go-sona-types/iq"
 	"github.com/spf13/cobra"
@@ -65,20 +64,11 @@ var iqCmd = &cobra.Command{
 			return
 		}
 
-		printHeader()
-		logger = logrus.New()
-		switch verbose {
-		case 1:
-			logger.Level = logrus.InfoLevel
-		case 2:
-			logger.Level = logrus.DebugLevel
-		case 3:
-			logger.Level = logrus.TraceLevel
-		default:
-			logger.Level = logrus.ErrorLevel
-		}
+		logLady, err = getLogger(verbose)
 
-		lifecycle = iq.New(logger,
+		printHeader()
+
+		lifecycle = iq.New(logLady,
 			iq.Options{
 				User:          iqUsername,
 				Token:         iqToken,
@@ -104,17 +94,17 @@ var iqCmd = &cobra.Command{
 
 		fmt.Println()
 		if res.IsError {
-			logger.WithField("res", res).Error("An error occurred with the request to IQ Server")
+			logLady.WithField("res", res).Error("An error occurred with the request to IQ Server")
 			return fmt.Errorf("Uh oh! There was an error with your request to Nexus IQ Server")
 		}
 
 		if res.PolicyAction != "Failure" {
-			logger.WithField("res", res).Debug("Successful in communicating with IQ Server")
+			logLady.WithField("res", res).Debug("Successful in communicating with IQ Server")
 			fmt.Println("Wonderbar! No policy violations reported for this audit!")
 			fmt.Println("Report URL: ", res.ReportHTMLURL)
 			os.Exit(0)
 		} else {
-			logger.WithField("res", res).Debug("Successful in communicating with IQ Server")
+			logLady.WithField("res", res).Debug("Successful in communicating with IQ Server")
 			fmt.Println("Ahoy, Ahab here matey, avast ye work, ye have some policy violations to clean up!")
 			fmt.Println("Report URL: ", res.ReportHTMLURL)
 			os.Exit(1)

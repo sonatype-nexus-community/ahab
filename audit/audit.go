@@ -17,6 +17,8 @@
 package audit
 
 import (
+	"bytes"
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"sort"
@@ -70,7 +72,48 @@ func outputJSON(loud bool, projects []types.Coordinate) (int, string) {
 }
 
 func outputCSV(loud bool, projects []types.Coordinate) (int, string) {
-	return 0, ""
+	_, vulnerablePackages := splitPackages(projects)
+
+	writer := func(w *csv.Writer, v types.Coordinate) {
+		if v.IsVulnerable() {
+			for _, vv := range v.Vulnerabilities {
+				w.Write([]string{
+					v.Coordinates,
+					v.Reference,
+					vv.ID,
+					vv.Title,
+					vv.Description,
+					vv.Reference,
+					vv.CvssScore.String(),
+					vv.Cve,
+					vv.CvssVector,
+				})
+			}
+		} else {
+			w.Write([]string{
+				v.Coordinates,
+				v.Reference,
+			})
+		}
+	}
+
+	b := new(bytes.Buffer)
+	w := csv.NewWriter(b)
+	defer w.Flush()
+
+	if loud {
+		for _, v := range projects {
+			writer(w, v)
+		}
+		w.Flush()
+		return len(vulnerablePackages), b.String()
+	}
+
+	for _, v := range vulnerablePackages {
+		writer(w, v)
+	}
+	w.Flush()
+	return len(vulnerablePackages), b.String()
 }
 
 func outputText(quiet bool, noColor bool, loud bool, projects []types.Coordinate) (int, string) {

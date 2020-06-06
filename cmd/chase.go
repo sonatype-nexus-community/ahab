@@ -153,7 +153,9 @@ func tryAuditPackages(purls []string, count int) {
 		logger.Error(err)
 	}
 	logger.Trace(coordinates)
-	_, results := audit.LogResults(quiet, noColor, loud, output, coordinates)
+	count, results := audit.LogResults(quiet, noColor, loud, output, coordinates)
+	logger.Trace(count)
+	logger.Trace(results)
 	fmt.Print(results)
 }
 

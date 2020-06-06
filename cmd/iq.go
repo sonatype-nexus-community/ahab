@@ -108,7 +108,7 @@ var iqCmd = &cobra.Command{
 			os.Exit(0)
 		} else {
 			logger.WithField("res", res).Debug("Successful in communicating with IQ Server")
-			fmt.Println("Hi, Nancy here, you have some policy violations to clean up!")
+			fmt.Println("Ahoy, Ahab here matey, avast ye work, ye have some policy violations to clean up!")
 			fmt.Println("Report URL: ", res.ReportHTMLURL)
 			os.Exit(1)
 		}

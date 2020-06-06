@@ -99,7 +99,6 @@ func outputCSV(loud bool, projects []types.Coordinate) (int, string) {
 
 	b := new(bytes.Buffer)
 	w := csv.NewWriter(b)
-	defer w.Flush()
 
 	if loud {
 		for _, v := range projects {

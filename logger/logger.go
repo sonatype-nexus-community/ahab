@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"fmt"
 	"os"
 	"path"
 
@@ -41,4 +42,12 @@ func LogFileLocation() (result string, err error) {
 	}
 	result = path.Join(result, types.OssIndexDirName, DefaultLogFile)
 	return
+}
+
+func PrintErrorAndLogLocation(err error) {
+	fmt.Println()
+	fmt.Println("Uh oh, an error occurred, if this persists try rerunning with -v, -vv, or -vvv to get more information in the logs")
+	fmt.Printf("Error: %v\n", err)
+	location, _ := LogFileLocation()
+	fmt.Printf("Check log file at %s for more information\n", location)
 }

@@ -21,6 +21,7 @@ import (
 	"os"
 
 	"github.com/sonatype-nexus-community/ahab/buildversion"
+	"github.com/sonatype-nexus-community/ahab/logger"
 	"github.com/sonatype-nexus-community/go-sona-types/iq"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -40,15 +41,15 @@ func init() {
 	rootCmd.AddCommand(iqCmd)
 
 	pf := iqCmd.PersistentFlags()
-	pf.StringVar(&operating, "os", "debian", "")
-	pf.StringVar(&iqUsername, "user", "admin", "Specify Nexus IQ username for request")
-	pf.StringVar(&iqToken, "token", "admin123", "Specify Nexus IQ token/password for request")
-	pf.StringVar(&ossIndexUser, "oss-index-user", "", "")
-	pf.StringVar(&ossIndexToken, "oss-index-token", "", "")
+	pf.StringVar(&operating, "os", "debian", "Specify a value for the operating system type you want to scan (alpine, debian, fedora)")
+	pf.StringVar(&iqUsername, "user", "admin", "Specify Nexus IQ Username for request")
+	pf.StringVar(&iqToken, "token", "admin123", "Specify Nexus IQ Token/Password for request")
+	pf.StringVar(&ossIndexUser, "oss-index-user", "", "Specify your OSS Index Username")
+	pf.StringVar(&ossIndexToken, "oss-index-token", "", "Specify your OSS Index API Token")
 	pf.StringVar(&iqHost, "host", "http://localhost:8070", "Specify Nexus IQ Server URL")
+	pf.BoolVar(&quiet, "quiet", false, "Quiet removes the header from being printed")
 	pf.StringVar(&application, "application", "", "Specify public application ID for request (required)")
 	pf.StringVar(&stage, "stage", "develop", "Specify stage for application")
-	pf.BoolVar(&noColor, "no-color", false, "")
 	pf.IntVar(&maxRetries, "max-retries", 300, "Specify maximum number of tries to poll Nexus IQ Server")
 	pf.CountVarP(&verbose, "", "v", "Set log level, higher is more verbose")
 }
@@ -56,17 +57,42 @@ func init() {
 var iqCmd = &cobra.Command{
 	Use:   "iq",
 	Short: "iq is used for auditing your projects with Nexus IQ Server",
+	Example: `
+	dpkg-query --show --showformat='${Package} ${Version}\n' | ./ahab iq --os debian --application testapp
+	yum list installed | ./ahab iq --os fedora --application testapp
+	apk info -vv | sort | ./ahab iq --os alpine	--application testapp
+	`,
+	SilenceErrors: true,
+	SilenceUsage:  true,
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
+		defer func() {
+			if r := recover(); r != nil {
+				var ok bool
+				err, ok = r.(error)
+				if !ok {
+					err = fmt.Errorf("pkg: %v", r)
+				}
+				cmd.Usage()
+				logger.PrintErrorAndLogLocation(err)
+			}
+		}()
+
+		if !quiet {
+			printHeader()
+		}
+
+		logLady, err = getLogger(verbose)
+		if err != nil {
+			panic(err)
+		}
+
 		fflags := cmd.Flags()
 
 		err = checkRequiredFlags(fflags)
 		if err != nil {
-			return
+			logLady.Error(err)
+			panic(err)
 		}
-
-		logLady, err = getLogger(verbose)
-
-		printHeader()
 
 		lifecycle = iq.New(logLady,
 			iq.Options{
@@ -84,31 +110,36 @@ var iqCmd = &cobra.Command{
 			})
 
 		pkgs, err := parseStdIn(&operating)
+		if err != nil {
+			logLady.Error(err)
+			panic(err)
+		}
 
 		purls := pkgs.ExtractPurlsFromProjectList(operating)
 
 		res, err := lifecycle.AuditPackages(purls, application)
 		if err != nil {
-			return
+			logLady.Error(err)
+			panic(err)
 		}
 
 		fmt.Println()
 		if res.IsError {
 			logLady.WithField("res", res).Error("An error occurred with the request to IQ Server")
-			return fmt.Errorf("Uh oh! There was an error with your request to Nexus IQ Server")
+			panic(fmt.Errorf("Uh oh! There was an error with your request to Nexus IQ Server"))
 		}
 
-		if res.PolicyAction != "Failure" {
-			logLady.WithField("res", res).Debug("Successful in communicating with IQ Server")
-			fmt.Println("Wonderbar! No policy violations reported for this audit!")
-			fmt.Println("Report URL: ", res.ReportHTMLURL)
-			os.Exit(0)
-		} else {
+		if res.PolicyAction == "Failure" {
 			logLady.WithField("res", res).Debug("Successful in communicating with IQ Server")
 			fmt.Println("Ahoy, Ahab here matey, avast ye work, ye have some policy violations to clean up!")
 			fmt.Println("Report URL: ", res.ReportHTMLURL)
 			os.Exit(1)
+			return
 		}
+
+		logLady.WithField("res", res).Debug("Successful in communicating with IQ Server")
+		fmt.Println("Wonderbar! No policy violations reported for this audit!")
+		fmt.Println("Report URL: ", res.ReportHTMLURL)
 		return
 	},
 }

@@ -48,24 +48,47 @@ var (
 
 func init() {
 	rootCmd.AddCommand(chaseCmd)
-	chaseCmd.PersistentFlags().StringVar(&operating, "os", "debian", "")
-	chaseCmd.PersistentFlags().BoolVar(&cleanCache, "clean-cache", false, "")
-	chaseCmd.PersistentFlags().StringVar(&ossIndexUser, "user", "", "")
-	chaseCmd.PersistentFlags().StringVar(&ossIndexToken, "token", "", "")
-	chaseCmd.PersistentFlags().StringVar(&output, "output", "text", "")
-	chaseCmd.PersistentFlags().BoolVar(&loud, "loud", false, "")
-	chaseCmd.PersistentFlags().BoolVar(&quiet, "quiet", false, "")
-	chaseCmd.PersistentFlags().BoolVar(&noColor, "no-color", false, "")
+	chaseCmd.PersistentFlags().StringVar(&operating, "os", "debian", "Specify a value for the operating system type you want to scan (alpine, debian, fedora)")
+	chaseCmd.PersistentFlags().BoolVar(&cleanCache, "clean-cache", false, "Flag to clean the database cache for OSS Index")
+	chaseCmd.PersistentFlags().StringVar(&ossIndexUser, "user", "", "Specify your OSS Index Username")
+	chaseCmd.PersistentFlags().StringVar(&ossIndexToken, "token", "", "Specify your OSS Index API Token")
+	chaseCmd.PersistentFlags().StringVar(&output, "output", "text", "Specify the output type you want (json, text, csv)")
+	chaseCmd.PersistentFlags().BoolVar(&loud, "loud", false, "Specify if you want non vulnerable packages included in your output")
+	chaseCmd.PersistentFlags().BoolVar(&quiet, "quiet", false, "Quiet removes the header from being printed")
+	chaseCmd.PersistentFlags().BoolVar(&noColor, "no-color", false, "Specify if you want no color in your results")
 	chaseCmd.PersistentFlags().CountVarP(&verbose, "", "v", "Set log level, higher is more verbose")
 }
 
 var chaseCmd = &cobra.Command{
 	Use:   "chase",
 	Short: "chase is used for auditing projects with OSS Index",
+	Example: `
+	dpkg-query --show --showformat='${Package} ${Version}\n' | ./ahab chase --os debian
+	yum list installed | ./ahab chase --os fedora
+	apk info -vv | sort | ./ahab chase --os alpine
+	`,
+	SilenceErrors: true,
+	SilenceUsage:  true,
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
+		defer func() {
+			if r := recover(); r != nil {
+				var ok bool
+				err, ok = r.(error)
+				if !ok {
+					err = fmt.Errorf("pkg: %v", r)
+				}
+				cmd.Usage()
+				logger.PrintErrorAndLogLocation(err)
+			}
+		}()
+
+		if output == "text" && !quiet {
+			printHeader()
+		}
+
 		logLady, err = getLogger(verbose)
 		if err != nil {
-			return
+			panic(err)
 		}
 
 		ossi = ossindex.New(logLady,
@@ -78,15 +101,11 @@ var chaseCmd = &cobra.Command{
 				Token:       ossIndexToken,
 			})
 
-		if output == "text" && !quiet {
-			printHeader()
-		}
-
 		if cleanCache {
 			err = ossi.NoCacheNoProblems()
 			if err != nil {
 				logLady.Error(err)
-				return
+				panic(err)
 			}
 			logLady.Trace("Cleaned Ahab Cache")
 			return
@@ -96,7 +115,7 @@ var chaseCmd = &cobra.Command{
 		pkgs, err := parseStdIn(&operating)
 		if err != nil {
 			logLady.Error(err)
-			return
+			panic(err)
 		}
 
 		logLady.Trace("Attempting to extract purls from Project List")
@@ -106,7 +125,7 @@ var chaseCmd = &cobra.Command{
 		coordinates, err := ossi.AuditPackages(purls)
 		if err != nil {
 			logLady.Error(err)
-			return
+			panic(err)
 		}
 
 		logLady.Trace("Attempting to output audited packages results")
@@ -161,7 +180,7 @@ func parseStdIn(operating *string) (packages.IPackage, error) {
 		return nil, err
 	}
 	if (fi.Mode() & os.ModeNamedPipe) == 0 {
-		return nil, fmt.Errorf("Nothing passed in to Standard In")
+		return nil, fmt.Errorf("Nothing passed in to standard in")
 	}
 
 	var list []string

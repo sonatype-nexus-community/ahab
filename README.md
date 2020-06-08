@@ -180,29 +180,22 @@ TBD
 
 ```
 $ export GO111MODULE=on
-$ go test ./...
-$ go build
+$ make deps
+$ make test
+$ make build
 ```
-
-### Download release binary
-
-TBD
 
 ## Development
 
-`ahab` is written using Golang 1.12, so it is best you start there.
+`ahab` is written using Golang 1.14, so it is best you start there.
 
-Tests can be run like `go test ./... -v`
+Tests can be run like `make test`
 
 ## Contributing
 
 We care a lot about making the world a safer place, and that's why we created `ahab`. If you as well want to
 speed up the pace of software development by working on this project, jump on in! Before you start work, create
 a new issue, or comment on an existing issue, to let others know you are!
-
-## Acknowledgements
-
-TBD
 
 ## The Fine Print
 

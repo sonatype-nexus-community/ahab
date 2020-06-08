@@ -43,41 +43,41 @@ func init() {
 	four, _ = decimal.NewFromString("4")
 }
 
-func LogResults(noColor bool, loud bool, output string, projects []types.Coordinate) (vulnerableCount int, results string) {
+func LogResults(noColor bool, loud bool, output string, projects []types.Coordinate) (vulnerableCount int, results string, err error) {
 	switch output {
 	case "json":
-		vulnerableCount, results = outputJSON(loud, projects)
+		vulnerableCount, results, err = outputJSON(loud, projects)
 	case "csv":
-		vulnerableCount, results = outputCSV(loud, projects)
+		vulnerableCount, results, err = outputCSV(loud, projects)
 	default:
-		vulnerableCount, results = outputText(noColor, loud, projects)
+		vulnerableCount, results, err = outputText(noColor, loud, projects)
 	}
 	return
 }
 
-func outputJSON(loud bool, projects []types.Coordinate) (int, string) {
+func outputJSON(loud bool, projects []types.Coordinate) (int, string, error) {
 	_, vulnerablePackages := splitPackages(projects)
 	if loud {
 		b, err := json.Marshal(projects)
 		if err != nil {
 			fmt.Println(err)
 		}
-		return len(vulnerablePackages), string(b)
+		return len(vulnerablePackages), string(b), nil
 	}
 	b, err := json.Marshal(vulnerablePackages)
 	if err != nil {
-		fmt.Println(err)
+		return 0, "", err
 	}
-	return len(vulnerablePackages), string(b)
+	return len(vulnerablePackages), string(b), nil
 }
 
-func outputCSV(loud bool, projects []types.Coordinate) (int, string) {
+func outputCSV(loud bool, projects []types.Coordinate) (int, string, error) {
 	_, vulnerablePackages := splitPackages(projects)
 
-	writer := func(w *csv.Writer, v types.Coordinate) {
+	writer := func(w *csv.Writer, v types.Coordinate) (err error) {
 		if v.IsVulnerable() {
 			for _, vv := range v.Vulnerabilities {
-				w.Write([]string{
+				err = w.Write([]string{
 					v.Coordinates,
 					v.Reference,
 					vv.ID,
@@ -88,13 +88,20 @@ func outputCSV(loud bool, projects []types.Coordinate) (int, string) {
 					vv.Cve,
 					vv.CvssVector,
 				})
+				if err != nil {
+					return
+				}
 			}
 		} else {
-			w.Write([]string{
+			err = w.Write([]string{
 				v.Coordinates,
 				v.Reference,
 			})
+			if err != nil {
+				return
+			}
 		}
+		return
 	}
 
 	b := new(bytes.Buffer)
@@ -102,20 +109,26 @@ func outputCSV(loud bool, projects []types.Coordinate) (int, string) {
 
 	if loud {
 		for _, v := range projects {
-			writer(w, v)
+			err := writer(w, v)
+			if err != nil {
+				return 0, "", err
+			}
 		}
 		w.Flush()
-		return len(vulnerablePackages), b.String()
+		return len(vulnerablePackages), b.String(), nil
 	}
 
 	for _, v := range vulnerablePackages {
-		writer(w, v)
+		err := writer(w, v)
+		if err != nil {
+			return 0, "", err
+		}
 	}
 	w.Flush()
-	return len(vulnerablePackages), b.String()
+	return len(vulnerablePackages), b.String(), nil
 }
 
-func outputText(noColor bool, loud bool, projects []types.Coordinate) (int, string) {
+func outputText(noColor bool, loud bool, projects []types.Coordinate) (int, string, error) {
 	var sb strings.Builder
 
 	w := tabwriter.NewWriter(&sb, 9, 3, 0, '\t', 0)
@@ -123,7 +136,11 @@ func outputText(noColor bool, loud bool, projects []types.Coordinate) (int, stri
 
 	nonVulnerablePackages, vulnerablePackages := splitPackages(projects)
 
-	groupAndPrint(vulnerablePackages, nonVulnerablePackages, loud, noColor, &sb)
+	err := groupAndPrint(vulnerablePackages, nonVulnerablePackages, loud, noColor, &sb)
+	if err != nil {
+		return 0, "", err
+	}
+
 	au := aurora.NewAurora(!noColor)
 	t := table.NewWriter()
 	t.SetStyle(table.StyleBold)
@@ -133,46 +150,68 @@ func outputText(noColor bool, loud bool, projects []types.Coordinate) (int, stri
 	t.AppendRow([]interface{}{"Vulnerable Dependencies", au.Bold(au.Red(strconv.Itoa(len(vulnerablePackages))))})
 	sb.WriteString(t.Render())
 
-	return len(vulnerablePackages), sb.String()
+	return len(vulnerablePackages), sb.String(), nil
 }
 
-func groupAndPrint(vulnerable []types.Coordinate, nonVulnerable []types.Coordinate, loud bool, noColor bool, sb *strings.Builder) {
+func groupAndPrint(vulnerable []types.Coordinate, nonVulnerable []types.Coordinate, loud bool, noColor bool, sb *strings.Builder) (err error) {
 	if loud {
-		sb.WriteString("\nNon Vulnerable Packages\n\n")
+		_, err = sb.WriteString("\nNon Vulnerable Packages\n\n")
+		if err != nil {
+			return
+		}
 		for k, v := range nonVulnerable {
-			formatPackage(sb, noColor, k+1, len(nonVulnerable), v)
+			err = formatPackage(sb, noColor, k+1, len(nonVulnerable), v)
+			if err != nil {
+				return
+			}
 		}
 	}
 	if len(vulnerable) > 0 {
-		sb.WriteString("\nVulnerable Packages\n\n")
+		_, err = sb.WriteString("\nVulnerable Packages\n\n")
+		if err != nil {
+			return
+		}
 		for k, v := range vulnerable {
-			formatVulnerability(sb, noColor, k+1, len(vulnerable), v)
+			err = formatVulnerability(sb, noColor, k+1, len(vulnerable), v)
+			if err != nil {
+				return
+			}
 		}
 	}
+
+	return
 }
 
-func formatPackage(sb *strings.Builder, noColor bool, idx int, packageCount int, coordinate types.Coordinate) {
+func formatPackage(sb *strings.Builder, noColor bool, idx int, packageCount int, coordinate types.Coordinate) (err error) {
 	au := aurora.NewAurora(!noColor)
 
-	sb.WriteString(
+	_, err = sb.WriteString(
 		fmt.Sprintf("[%d/%d]\t%s\n",
 			idx,
 			packageCount,
 			au.Bold(au.Green(coordinate.Coordinates)).String(),
 		),
 	)
+	if err != nil {
+		return
+	}
+
+	return
 }
 
-func formatVulnerability(sb *strings.Builder, noColor bool, idx int, packageCount int, coordinate types.Coordinate) {
+func formatVulnerability(sb *strings.Builder, noColor bool, idx int, packageCount int, coordinate types.Coordinate) (err error) {
 	au := aurora.NewAurora(!noColor)
 
-	sb.WriteString(fmt.Sprintf(
+	_, err = sb.WriteString(fmt.Sprintf(
 		"[%d/%d]\t%s\n%s \n",
 		idx,
 		packageCount,
 		au.Bold(au.Red(coordinate.Coordinates)).String(),
 		au.Red(strconv.Itoa(len(coordinate.Vulnerabilities))+" known vulnerabilities affecting installed version").String(),
 	))
+	if err != nil {
+		return
+	}
 	sort.Slice(coordinate.Vulnerabilities, func(i, j int) bool {
 		return coordinate.Vulnerabilities[i].CvssScore.GreaterThan(coordinate.Vulnerabilities[j].CvssScore)
 	})
@@ -191,9 +230,13 @@ func formatVulnerability(sb *strings.Builder, noColor bool, idx int, packageCoun
 			t.AppendRow([]interface{}{"CVSS Vector", v.CvssVector})
 			t.AppendSeparator()
 			t.AppendRow([]interface{}{"Link for more info", v.Reference})
-			sb.WriteString(t.Render() + "\n")
+			_, err = sb.WriteString(t.Render() + "\n")
+			if err != nil {
+				return
+			}
 		}
 	}
+	return
 }
 
 func printColorBasedOnCvssScore(score decimal.Decimal, text string, noColor bool) string {

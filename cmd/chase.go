@@ -77,7 +77,7 @@ var chaseCmd = &cobra.Command{
 				if !ok {
 					err = fmt.Errorf("pkg: %v", r)
 				}
-				cmd.Usage()
+				_ = cmd.Usage()
 				logger.PrintErrorAndLogLocation(err)
 			}
 		}()
@@ -129,7 +129,12 @@ var chaseCmd = &cobra.Command{
 		}
 
 		logLady.Trace("Attempting to output audited packages results")
-		count, results := audit.LogResults(noColor, loud, output, coordinates)
+		count, results, err := audit.LogResults(noColor, loud, output, coordinates)
+		if err != nil {
+			logLady.Error(err)
+			panic(err)
+		}
+
 		fmt.Print(results)
 		if count > 0 {
 			os.Exit(1)
@@ -153,8 +158,7 @@ func getLogger(level int) (*logrus.Logger, error) {
 }
 
 func parseStdInList(list []string, operating *string) (packages.IPackage, error) {
-	var thing string
-	thing = *operating
+	thing := *operating
 	switch thing {
 	case "debian":
 		logLady.Trace("Chasing Debian")

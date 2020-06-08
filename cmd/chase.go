@@ -129,7 +129,7 @@ var chaseCmd = &cobra.Command{
 		}
 
 		logLady.Trace("Attempting to output audited packages results")
-		count, results := audit.LogResults(quiet, noColor, loud, output, coordinates)
+		count, results := audit.LogResults(noColor, loud, output, coordinates)
 		fmt.Print(results)
 		if count > 0 {
 			os.Exit(1)

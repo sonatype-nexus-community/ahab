@@ -43,14 +43,14 @@ func init() {
 	four, _ = decimal.NewFromString("4")
 }
 
-func LogResults(quiet bool, noColor bool, loud bool, output string, projects []types.Coordinate) (vulnerableCount int, results string) {
+func LogResults(noColor bool, loud bool, output string, projects []types.Coordinate) (vulnerableCount int, results string) {
 	switch output {
 	case "json":
 		vulnerableCount, results = outputJSON(loud, projects)
 	case "csv":
 		vulnerableCount, results = outputCSV(loud, projects)
 	default:
-		vulnerableCount, results = outputText(quiet, noColor, loud, projects)
+		vulnerableCount, results = outputText(noColor, loud, projects)
 	}
 	return
 }
@@ -115,7 +115,7 @@ func outputCSV(loud bool, projects []types.Coordinate) (int, string) {
 	return len(vulnerablePackages), b.String()
 }
 
-func outputText(quiet bool, noColor bool, loud bool, projects []types.Coordinate) (int, string) {
+func outputText(noColor bool, loud bool, projects []types.Coordinate) (int, string) {
 	var sb strings.Builder
 
 	w := tabwriter.NewWriter(&sb, 9, 3, 0, '\t', 0)

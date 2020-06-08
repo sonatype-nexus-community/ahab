@@ -1,4 +1,5 @@
-// Copyright 2019 Sonatype Inc.
+//
+// Copyright 2019-Present Sonatype Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +12,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+
 package parse_test
 
 import (
@@ -18,7 +21,6 @@ import (
 	"testing"
 
 	. "github.com/sonatype-nexus-community/ahab/parse"
-	"github.com/sonatype-nexus-community/nancy/types"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -51,14 +53,14 @@ func TestParseApkShowList(t *testing.T) {
 	}
 
 	// alpine-baselayout-3.1.2-r0
-	assert.Equal(t, types.Projects{"alpine-baselayout", "3.1.2"}, result.Projects[0])
+	assert.Equal(t, Projects{"alpine-baselayout", "3.1.2"}, result.Projects[0])
 
 	// alpine-keys-2.1-r2
-	assert.Equal(t, types.Projects{"alpine-keys", "2.1"}, result.Projects[1])
+	assert.Equal(t, Projects{"alpine-keys", "2.1"}, result.Projects[1])
 
 	// apk-tools-2.10.4-r2
-	assert.Equal(t, types.Projects{"apk-tools", "2.10.4"}, result.Projects[2])
+	assert.Equal(t, Projects{"apk-tools", "2.10.4"}, result.Projects[2])
 
 	// ca-certificates-cacert-20190108-r0
-	assert.Equal(t, types.Projects{"ca-certificates-cacert", "20190108"}, result.Projects[4])
+	assert.Equal(t, Projects{"ca-certificates-cacert", "20190108"}, result.Projects[4])
 }

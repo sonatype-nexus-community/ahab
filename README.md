@@ -12,12 +12,6 @@
 
 `ahab` is a tool to check for vulnerabilities in your apt or yum powered operating systems, powered by [Sonatype OSS Index](https://ossindex.sonatype.org/).
 
-To use `ahab`, assuming you have a built version of it:
-
-* `dpkg-query --show --showformat='${Package} ${Version}\n' | ./ahab chase`
-* `yum list installed | ./ahab chase --os fedora`
-* `apk info -vv | sort | ./ahab chase --os alpine`
-
 `ahab` currently works for images that use `apt`, `apk` or `yum` for package management.
 
 ## Why is this useful?
@@ -56,6 +50,117 @@ $ docker build . -t test
 ```
 
 You should see `ahab` run and fail the Docker build, due to some vulnerabilities in the base os packages (Ubuntu in this case)!
+
+### Usage
+
+```
+ $ ahab
+ ______      __                    __
+/\  _  \    /\ \                  /\ \
+\ \ \L\ \   \ \ \___       __     \ \ \____
+ \ \  __ \   \ \  _ `\   /'__`\    \ \ '__`\
+  \ \ \/\ \   \ \ \ \ \ /\ \L\.\_   \ \ \L\ \
+   \ \_\ \_\   \ \_\ \_\\ \__/.\_\   \ \_,__/
+    \/_/\/_/    \/_/\/_/ \/__/\/_/    \/___/
+  _        _                           _    _
+ /_)      /_` _  _  _ _/_     _  _    (/   /_` _ . _  _   _/  _
+/_) /_/  ._/ /_// //_|/  /_/ /_//_'  (_X  /   / / /_'/ //_/ _\
+    _/                   _/ /
+Ahab version: development
+Usage:
+  ahab [flags]
+  ahab [command]
+
+Available Commands:
+  chase       chase is used for auditing projects with OSS Index
+  help        Help about any command
+  iq          iq is used for auditing your projects with Nexus IQ Server
+
+Flags:
+  -h, --help   help for ahab
+
+Use "ahab [command] --help" for more information about a command.
+```
+
+#### OSS Index usage
+
+```
+$ ahab chase
+ ______      __                    __
+/\  _  \    /\ \                  /\ \
+\ \ \L\ \   \ \ \___       __     \ \ \____
+ \ \  __ \   \ \  _ `\   /'__`\    \ \ '__`\
+  \ \ \/\ \   \ \ \ \ \ /\ \L\.\_   \ \ \L\ \
+   \ \_\ \_\   \ \_\ \_\\ \__/.\_\   \ \_,__/
+    \/_/\/_/    \/_/\/_/ \/__/\/_/    \/___/
+  _        _                           _    _
+ /_)      /_` _  _  _ _/_     _  _    (/   /_` _ . _  _   _/  _
+/_) /_/  ._/ /_// //_|/  /_/ /_//_'  (_X  /   / / /_'/ //_/ _\
+    _/                   _/ /
+Ahab version: development
+Usage:
+  ahab chase [flags]
+
+Examples:
+
+        dpkg-query --show --showformat='${Package} ${Version}\n' | ./ahab chase --os debian
+        yum list installed | ./ahab chase --os fedora
+        apk info -vv | sort | ./ahab chase --os alpine
+
+
+Flags:
+  -v, -- count          Set log level, higher is more verbose
+      --clean-cache     Flag to clean the database cache for OSS Index
+  -h, --help            help for chase
+      --loud            Specify if you want non vulnerable packages included in your output
+      --no-color        Specify if you want no color in your results
+      --os string       Specify a value for the operating system type you want to scan (alpine, debian, fedora) (default "debian")
+      --output string   Specify the output type you want (json, text, csv) (default "text")
+      --quiet           Quiet removes the header from being printed
+      --token string    Specify your OSS Index API Token
+      --user string     Specify your OSS Index Username
+```
+
+#### Nexus IQ Server Usage
+
+```
+$ ahab iq
+ ______      __                    __
+/\  _  \    /\ \                  /\ \
+\ \ \L\ \   \ \ \___       __     \ \ \____
+ \ \  __ \   \ \  _ `\   /'__`\    \ \ '__`\
+  \ \ \/\ \   \ \ \ \ \ /\ \L\.\_   \ \ \L\ \
+   \ \_\ \_\   \ \_\ \_\\ \__/.\_\   \ \_,__/
+    \/_/\/_/    \/_/\/_/ \/__/\/_/    \/___/
+  _        _                           _    _
+ /_)      /_` _  _  _ _/_     _  _    (/   /_` _ . _  _   _/  _
+/_) /_/  ._/ /_// //_|/  /_/ /_//_'  (_X  /   / / /_'/ //_/ _\
+    _/                   _/ /
+Ahab version: development
+Usage:
+  ahab iq [flags]
+
+Examples:
+
+        dpkg-query --show --showformat='${Package} ${Version}\n' | ./ahab iq --os debian --application testapp
+        yum list installed | ./ahab iq --os fedora --application testapp
+        apk info -vv | sort | ./ahab iq --os alpine     --application testapp
+
+
+Flags:
+  -v, -- count                   Set log level, higher is more verbose
+      --application string       Specify public application ID for request (required)
+  -h, --help                     help for iq
+      --host string              Specify Nexus IQ Server URL (default "http://localhost:8070")
+      --max-retries int          Specify maximum number of tries to poll Nexus IQ Server (default 300)
+      --os string                Specify a value for the operating system type you want to scan (alpine, debian, fedora) (default "debian")
+      --oss-index-token string   Specify your OSS Index API Token
+      --oss-index-user string    Specify your OSS Index Username
+      --quiet                    Quiet removes the header from being printed
+      --stage string             Specify stage for application (default "develop")
+      --token string             Specify Nexus IQ Token/Password for request (default "admin123")
+      --user string              Specify Nexus IQ Username for request (default "admin")
+```
 
 ## Why Ahab?
 

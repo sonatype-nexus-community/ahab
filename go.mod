@@ -1,15 +1,16 @@
 module github.com/sonatype-nexus-community/ahab
 
-go 1.12
+go 1.14
 
 require (
-	github.com/AndreasBriese/bbloom v0.0.0-20190825152654-46b345b51c96 // indirect
-	github.com/golang/protobuf v1.3.2 // indirect
-	github.com/kr/pretty v0.1.0 // indirect
-	github.com/shopspring/decimal v0.0.0-20190905144223-a36b5d85f337 // indirect
-	github.com/sonatype-nexus-community/nancy v0.0.21
-	github.com/stretchr/testify v1.4.0
-	golang.org/x/net v0.0.0-20190827160401-ba9fcec4b297 // indirect
-	golang.org/x/sys v0.0.0-20190904154756-749cb33beabd // indirect
-	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
+	github.com/common-nighthawk/go-figure v0.0.0-20200604155835-c37800f1341b
+	github.com/jedib0t/go-pretty/v6 v6.0.3
+	github.com/logrusorgru/aurora v0.0.0-20200102142835-e9ef32dff381
+	github.com/shopspring/decimal v1.2.0
+	github.com/sirupsen/logrus v1.6.0
+	github.com/sonatype-nexus-community/go-sona-types v0.0.1
+	github.com/spf13/cobra v1.0.0
+	github.com/spf13/pflag v1.0.5
+	github.com/stretchr/testify v1.6.1
+	golang.org/x/sys v0.0.0-20200602225109-6fdc65e7d980 // indirect
 )

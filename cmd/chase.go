@@ -189,10 +189,9 @@ func parseStdIn(operating *string) (packages.IPackage, error) {
 		list = append(list, scanner.Text())
 	}
 	if err := scanner.Err(); err != nil {
-		if err != nil {
-			return nil, err
-		}
+		return nil, err
 	}
+
 	return parseStdInList(list, operating)
 }
 

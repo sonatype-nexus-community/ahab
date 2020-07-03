@@ -1,3 +1,4 @@
+Loaded plugins: fastestmirror, ovl
 Installed Packages
 acl.x86_64                                                                        2.2.51-14.el7                                                         @CentOS 
 audit-libs.x86_64                                                                 2.8.4-4.el7                                                           @CentOS 

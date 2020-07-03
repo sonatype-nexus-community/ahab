@@ -132,11 +132,14 @@ func outputText(noColor bool, loud bool, projects []types.Coordinate) (int, stri
 	var sb strings.Builder
 
 	w := tabwriter.NewWriter(&sb, 9, 3, 0, '\t', 0)
-	w.Flush()
+	err := w.Flush()
+	if err != nil {
+		return 0, "", err
+	}
 
 	nonVulnerablePackages, vulnerablePackages := splitPackages(projects)
 
-	err := groupAndPrint(vulnerablePackages, nonVulnerablePackages, loud, noColor, &sb)
+	err = groupAndPrint(vulnerablePackages, nonVulnerablePackages, loud, noColor, &sb)
 	if err != nil {
 		return 0, "", err
 	}

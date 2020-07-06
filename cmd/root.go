@@ -33,7 +33,7 @@ var rootCmd = &cobra.Command{
 	Short: "ahab is a tool for scanning linux OS packages for vulnerabilities",
 	Run: func(cmd *cobra.Command, args []string) {
 		printHeader()
-		cmd.Usage()
+		_ = cmd.Usage()
 	},
 }
 

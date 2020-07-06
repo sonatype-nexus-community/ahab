@@ -1,8 +1,25 @@
+<!--
+
+    Copyright 2019-Present Sonatype Inc.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
 <p align="center">
     <img src="https://github.com/sonatype-nexus-community/ahab/blob/master/docs/images/ahab.png" width="350"/>
 </p>
 <p align="center">
-    <a href="https://travis-ci.org/sonatype-nexus-community/ahab"><img src="https://travis-ci.org/sonatype-nexus-community/ahab.svg?branch=master" alt="Build Status"></img></a>
+    <a href="https://circleci.com/gh/sonatype-nexus-community/ahab"><img src="https://circleci.com/gh/sonatype-nexus-community/ahab.svg?style=shield" alt="Circle CI Build Status"></img></a>
 </p>
 <p align="center">
     <a href="https://depshield.github.io"><img src="https://depshield.sonatype.org/badges/sonatype-nexus-community/ahab/depshield.svg" alt="DepShield Badge"></img></a>
@@ -180,29 +197,22 @@ TBD
 
 ```
 $ export GO111MODULE=on
-$ go test ./...
-$ go build
+$ make deps
+$ make test
+$ make build
 ```
-
-### Download release binary
-
-TBD
 
 ## Development
 
-`ahab` is written using Golang 1.12, so it is best you start there.
+`ahab` is written using Golang 1.14, so it is best you start there.
 
-Tests can be run like `go test ./... -v`
+Tests can be run like `make test`
 
 ## Contributing
 
 We care a lot about making the world a safer place, and that's why we created `ahab`. If you as well want to
 speed up the pace of software development by working on this project, jump on in! Before you start work, create
 a new issue, or comment on an existing issue, to let others know you are!
-
-## Acknowledgements
-
-TBD
 
 ## The Fine Print
 

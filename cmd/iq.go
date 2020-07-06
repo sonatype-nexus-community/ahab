@@ -72,7 +72,7 @@ var iqCmd = &cobra.Command{
 				if !ok {
 					err = fmt.Errorf("pkg: %v", r)
 				}
-				cmd.Usage()
+				_ = cmd.Usage()
 				logger.PrintErrorAndLogLocation(err)
 			}
 		}()

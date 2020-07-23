@@ -83,7 +83,7 @@ func init() {
 	chaseCmd.PersistentFlags().BoolVar(&quiet, "quiet", false, "Quiet removes the header from being printed")
 	chaseCmd.PersistentFlags().BoolVar(&noColor, "no-color", false, "Specify if you want no color in your results")
 	chaseCmd.PersistentFlags().CountVarP(&verbose, "", "v", "Set log level, higher is more verbose")
-	chaseCmd.Flags().StringVarP(&excludeVulnerabilityFilePath, "exclude-vulnerability-file", "x", "./.nancy-ignore", "Path to a file containing newline separated CVEs to be excluded")
+	chaseCmd.Flags().StringVarP(&excludeVulnerabilityFilePath, "exclude-vulnerability-file", "x", "./.ahab-ignore", "Path to a file containing newline separated CVEs to be excluded")
 }
 
 var chaseCmd = &cobra.Command{

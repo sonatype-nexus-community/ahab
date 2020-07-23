@@ -13,50 +13,50 @@
 # limitations under the License.
 
 before:
-    hooks:
-      - go mod download
-      - go mod tidy
-  builds:
-    -
-      ldflags:
-        - -s -w
-          -X "github.com/sonatype-nexus-community/ahab/buildversion.BuildVersion={{.Version}}"
-          -X "github.com/sonatype-nexus-community/ahab/buildversion.BuildTime={{time "2006-01-02T15:04:05Z07:00"}}"
-          -X "github.com/sonatype-nexus-community/ahab/buildversion.BuildCommit={{.FullCommit}}"
-      env:
-        - CGO_ENABLED=0
-      goos:
-        - linux
-        - darwin
-        - windows
-      goarch:
-        - amd64
-        - 386
+  hooks:
+    - go mod download
+    - go mod tidy
+builds:
+  -
+    ldflags:
+      - -s -w
+        -X "github.com/sonatype-nexus-community/ahab/buildversion.BuildVersion={{.Version}}"
+        -X "github.com/sonatype-nexus-community/ahab/buildversion.BuildTime={{time "2006-01-02T15:04:05Z07:00"}}"
+        -X "github.com/sonatype-nexus-community/ahab/buildversion.BuildCommit={{.FullCommit}}"
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - 386
+
+archives:
+  -
+    id: default
+    name_template: "{{ .ProjectName }}-{{ .Os }}.{{ .Arch }}-v{{ .Version }}"
+    format: binary
   
-  archives:
-    -
-      id: default
-      name_template: "{{ .ProjectName }}-{{ .Os }}.{{ .Arch }}-v{{ .Version }}"
-      format: binary
-  
-  checksum:
-    name_template: "{{ .ProjectName }}checksums.txt"
-    algorithm: sha256
-  
-  snapshot:
-    name_template: "{{ .Version }}-next-{{.FullCommit}}"
-  
-  changelog:
-    sort: asc
-    filters:
-      exclude:
-      - '^docs:'
-      - '^test:'
-  
-  release:
-    ids:
-      - default
-    github:
-      owner: sonatype-nexus-community
-      name: ahab
+checksum:
+  name_template: "{{ .ProjectName }}checksums.txt"
+  algorithm: sha256
+
+snapshot:
+  name_template: "{{ .Version }}-next-{{.FullCommit}}"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+    - '^docs:'
+    - '^test:'
+
+release:
+  ids:
+    - default
+  github:
+    owner: sonatype-nexus-community
+    name: ahab
   

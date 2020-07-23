@@ -43,7 +43,13 @@ func init() {
 	four, _ = decimal.NewFromString("4")
 }
 
-func LogResults(noColor bool, loud bool, output string, projects []types.Coordinate) (vulnerableCount int, results string, err error) {
+// LogResults will given a number of expected results and the results themselves, log the
+// results.
+func LogResults(noColor bool, loud bool, output string, projects []types.Coordinate, exclusions []string) (vulnerableCount int, results string, err error) {
+	for _, c := range projects {
+		c.ExcludeVulnerabilities(exclusions)
+	}
+
 	switch output {
 	case "json":
 		vulnerableCount, results, err = outputJSON(loud, projects)

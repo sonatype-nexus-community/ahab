@@ -20,6 +20,8 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/common-nighthawk/go-figure"
@@ -34,16 +36,39 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type CveListFlag struct {
+	Cves []string
+}
+
+func (cve *CveListFlag) String() string {
+	return fmt.Sprint(cve.Cves)
+}
+
+func (cve *CveListFlag) Set(value string) error {
+	if len(cve.Cves) > 0 {
+		return fmt.Errorf("The CVE Exclude Flag is already set")
+	}
+	cve.Cves = strings.Split(strings.ReplaceAll(value, " ", ""), ",")
+
+	return nil
+}
+
+func (cve *CveListFlag) Type() string { return "CveListFlag" }
+
 var (
-	operating     string
-	cleanCache    bool
-	ossIndexUser  string
-	ossIndexToken string
-	output        string
-	loud          bool
-	quiet         bool
-	noColor       bool
-	ossi          *ossindex.Server
+	operating                    string
+	cleanCache                   bool
+	ossIndexUser                 string
+	ossIndexToken                string
+	output                       string
+	loud                         bool
+	quiet                        bool
+	noColor                      bool
+	excludeVulnerabilityFilePath string
+	cveList                      CveListFlag
+	unixComments                 = regexp.MustCompile(`#.*$`)
+	untilComment                 = regexp.MustCompile(`(until=)(.*)`)
+	ossi                         *ossindex.Server
 )
 
 func init() {
@@ -53,10 +78,12 @@ func init() {
 	chaseCmd.PersistentFlags().StringVar(&ossIndexUser, "user", "", "Specify your OSS Index Username")
 	chaseCmd.PersistentFlags().StringVar(&ossIndexToken, "token", "", "Specify your OSS Index API Token")
 	chaseCmd.PersistentFlags().StringVar(&output, "output", "text", "Specify the output type you want (json, text, csv)")
+	chaseCmd.Flags().VarP(&cveList, "exclude-vulnerability", "e", "Comma separated list of CVEs to exclude")
 	chaseCmd.PersistentFlags().BoolVar(&loud, "loud", false, "Specify if you want non vulnerable packages included in your output")
 	chaseCmd.PersistentFlags().BoolVar(&quiet, "quiet", false, "Quiet removes the header from being printed")
 	chaseCmd.PersistentFlags().BoolVar(&noColor, "no-color", false, "Specify if you want no color in your results")
 	chaseCmd.PersistentFlags().CountVarP(&verbose, "", "v", "Set log level, higher is more verbose")
+	chaseCmd.Flags().StringVarP(&excludeVulnerabilityFilePath, "exclude-vulnerability-file", "x", "./.ahab-ignore", "Path to a file containing newline separated CVEs to be excluded")
 }
 
 var chaseCmd = &cobra.Command{
@@ -111,6 +138,8 @@ var chaseCmd = &cobra.Command{
 			return
 		}
 
+		err = getCVEExcludesFromFile(excludeVulnerabilityFilePath)
+
 		logLady.Trace("Attempting to audit list of strings from standard in")
 		pkgs, err := parseStdIn(&operating)
 		if err != nil {
@@ -129,7 +158,7 @@ var chaseCmd = &cobra.Command{
 		}
 
 		logLady.Trace("Attempting to output audited packages results")
-		count, results, err := audit.LogResults(noColor, loud, output, coordinates)
+		count, results, err := audit.LogResults(noColor, loud, output, coordinates, cveList.Cves)
 		if err != nil {
 			logLady.Error(err)
 			panic(err)
@@ -203,4 +232,54 @@ func printHeader() {
 	figure.NewFigure("Ahab", "larry3d", true).Print()
 	figure.NewFigure("By Sonatype & Friends", "pepper", true).Print()
 	fmt.Println("Ahab version: " + buildversion.BuildVersion)
+}
+
+func getCVEExcludesFromFile(excludeVulnerabilityFilePath string) error {
+	fi, err := os.Stat(excludeVulnerabilityFilePath)
+	if (fi != nil && fi.IsDir()) || (err != nil && os.IsNotExist(err)) {
+		return nil
+	}
+	file, err := os.Open(excludeVulnerabilityFilePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		ogLine := scanner.Text()
+		err := determineIfLineIsExclusion(ogLine)
+		if err != nil {
+			return err
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func determineIfLineIsExclusion(ogLine string) error {
+	line := unixComments.ReplaceAllString(ogLine, "")
+	until := untilComment.FindStringSubmatch(line)
+	line = untilComment.ReplaceAllString(line, "")
+	cveOnly := strings.TrimSpace(line)
+
+	if len(cveOnly) > 0 {
+		if until != nil {
+			parseDate, err := time.Parse("2006-01-02", strings.TrimSpace(until[2]))
+			if err != nil {
+				return fmt.Errorf("failed to parse until at line %q. Expected format is 'until=yyyy-MM-dd'", ogLine)
+			}
+			if parseDate.After(time.Now()) {
+				cveList.Cves = append(cveList.Cves, cveOnly)
+			}
+		} else {
+			cveList.Cves = append(cveList.Cves, cveOnly)
+		}
+	}
+
+	return nil
 }

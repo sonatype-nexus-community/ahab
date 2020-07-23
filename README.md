@@ -138,6 +138,44 @@ Flags:
       --user string     Specify your OSS Index Username
 ```
 
+#### Exclude vulnerabilities
+
+Sometimes you'll run into a dependency that after taking a look at, you either aren't affected by, or cannot resolve for some reason. Ahab understands, and will let you 
+exclude these vulnerabilities so you can get back to a passing build:
+
+Vulnerabilities excluded will then be silenced and not show up in the output or fail your build.
+
+We support exclusion of vulnerability either by CVE-ID (ex: `CVE-2018-20303`) or via the OSS Index ID (ex: `a8c20c84-1f6a-472a-ba1b-3eaedb2a2a14`) as not all vulnerabilities have a CVE-ID.
+
+##### Via CLI flag
+* `./ahab --exclude-vulnerability CVE-789,bcb0c38d-0d35-44ee-b7a7-8f77183d1ae2`
+* `./ahab --exclude-vulnerability CVE-789,bcb0c38d-0d35-44ee-b7a7-8f77183d1ae2`
+
+##### Via file
+By default if a file named `.ahab-ignore` exists in the same directory that ahab is run it will use it, will no other options need to be passed.
+
+If you would like to define the path to the file you can use the following
+* `./ahab --exclude-vulnerability-file=/path/to/your/exclude-file`
+* `./ahab --exclude-vulnerability-file=/path/to/your/exclude-file`  
+
+The file format requires each vulnerability that you want to exclude to be on a separate line. Comments are allowed in the file as well to help provide context when needed. See an example file below.
+
+```
+# This vulnerability is coming from package xyz, we are ok with this for now
+CVN-111 
+CVN-123 # Mitigated the risk of this since we only use one method in this package and the affected code doesn't matter
+CVN-543
+``` 
+
+It's also possible to define expiring ignores. Meaning that if you define a date on a vulnerability ignore until that date it will be ignored and once that 
+date is passed it will now be reported by ahab if its still an issue. Format to add an expiring ignore looks as follows. They can also be followed up by comments 
+to provide context to as why its been ignored until that date.    
+
+```
+CVN-111 until=2021-01-01
+CVN-543 until=2018-02-12 #Waiting on release from third party. Should be out before this date but gives us a little time to fix it. 
+```
+
 #### Nexus IQ Server Usage
 
 ```

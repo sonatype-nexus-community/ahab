@@ -86,7 +86,10 @@ func doParseAptVersionIntoPurl(name string, version string) (newVersion string) 
 
 func ParseDpkgList(packages []string) (projectList ProjectList) {
 	for _, pkg := range packages {
-		projectList.Projects = append(projectList.Projects, doDpkgParse(pkg))
+		pkg = strings.TrimSpace(pkg)
+		if pkg != "" {
+			projectList.Projects = append(projectList.Projects, doDpkgParse(pkg))
+		}
 	}
 	return
 }

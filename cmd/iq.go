@@ -61,6 +61,7 @@ var iqCmd = &cobra.Command{
 	Example: `
 	dpkg-query --show --showformat='${Package} ${Version}\n' | ./ahab iq --application testapp
 	yum list installed | ./ahab iq --application testapp
+	dnf list installed | ./ahab iq --application testapp
 	apk info -vv | sort | ./ahab iq	--application testapp
 	`,
 	SilenceErrors: true,

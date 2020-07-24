@@ -27,9 +27,9 @@
 
 # Ahab
 
-`ahab` is a tool to check for vulnerabilities in your apt, apk or yum powered operating systems, powered by [Sonatype OSS Index](https://ossindex.sonatype.org/).
+`ahab` is a tool to check for vulnerabilities in your apt, apk, yum or dnf powered operating systems, powered by [Sonatype OSS Index](https://ossindex.sonatype.org/).
 
-`ahab` currently works for images that use `apt`, `apk` or `yum` for package management and will do its best to auto detect which package 
+`ahab` currently works for images that use `apt`, `apk`, `yum` or `dnf` for package management and will do its best to auto detect which package 
 manager is being used by your os.
 
 ## Why is this useful?
@@ -62,12 +62,28 @@ In this repo we have a Dockerfile that will copy in `ahab`, and run it on Ubuntu
 
 To run this test:
 
+Ubuntu
+
 ```
 $ GOOS=linux GOARCH=amd64 go build 
-$ docker build . -t test
+$ docker build -f Dockerfile.ubuntu . -t test
 ```
 
-You should see `ahab` run and fail the Docker build, due to some vulnerabilities in the base os packages (Ubuntu in this case)!
+Fedora
+
+```
+$ GOOS=linux GOARCH=amd64 go build 
+$ docker build -f Dockerfile.fedora . -t test
+```
+
+Alpine
+
+```
+$ GOOS=linux GOARCH=amd64 go build 
+$ docker build -f Dockerfile.alpine . -t test
+```
+
+Depending on the OS, you'll see Ahab run and fail (Ubuntu and Fedora) or succeed (Alpine).
 
 ### Usage
 

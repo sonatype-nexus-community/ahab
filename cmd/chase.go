@@ -201,19 +201,40 @@ func parseStdInList(list []string, operating *string) (packages.IPackage, error)
 	thing := *operating
 	switch thing {
 	case "debian":
-		logLady.Trace("Chasing Debian")
+		logLady.WithFields(logrus.Fields{
+			"list": list,
+		}).Trace("Chasing Debian")
+
 		var aptResult packages.Apt
 		aptResult.ProjectList = parse.ParseDpkgList(list)
+
+		logLady.WithFields(logrus.Fields{
+			"project_list": aptResult.ProjectList,
+		}).Trace("Obtained apt project list")
 		return aptResult, nil
 	case "alpine":
-		logLady.Trace("Chasing Alpine")
+		logLady.WithFields(logrus.Fields{
+			"list": list,
+		}).Trace("Chasing Alpine")
+
 		var apkResult packages.Apk
 		apkResult.ProjectList = parse.ParseApkShow(list)
+
+		logLady.WithFields(logrus.Fields{
+			"project_list": apkResult.ProjectList,
+		}).Trace("Obtained apk project list")
 		return apkResult, nil
 	default:
-		logLady.Trace("Chasing Yum")
+		logLady.WithFields(logrus.Fields{
+			"list": list,
+		}).Trace("Chasing Yum")
+
 		var yumResult packages.Yum
 		yumResult.ProjectList = parse.ParseYumListFromStdIn(list)
+
+		logLady.WithFields(logrus.Fields{
+			"project_list": yumResult.ProjectList,
+		}).Trace("Obtained yum project list")
 		return yumResult, nil
 	}
 }

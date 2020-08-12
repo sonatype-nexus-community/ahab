@@ -16,32 +16,32 @@ package packages
 import (
 	"errors"
 	"fmt"
-	"os"
 	"os/exec"
 	"syscall"
+
+	"github.com/sirupsen/logrus"
 )
 
 var execCommand = exec.Command
 
 const SupportedPackageManagers = "supported package managers are dpkg-query, apk or yum, could not find any. Possible issues: 1.) dpkg-query, apk or yum is not installed. 2.) 'which' program is not installed to do auto detection"
 
-func DetectPackageManager(verbose ...bool) (string, error) {
+func DetectPackageManager(logger *logrus.Logger) (string, error) {
 	var os string
-	beChatty := len(verbose) > 0 && verbose[0] == true
 
-	installed := determineIfPackageManagerInstalled("apk", beChatty)
+	installed := determineIfPackageManagerInstalled("apk", logger)
 	if installed {
 		//Having this be OS is a little weird. It probably should have been just package manager based flag.
 		os = "alpine"
 		return os, nil
 	}
-	installed = determineIfPackageManagerInstalled("yum", beChatty)
+	installed = determineIfPackageManagerInstalled("yum", logger)
 	if installed {
 		//Having this be OS is a little weird. It probably should have been just package manager based flag.
 		os = "fedora"
 		return os, nil
 	}
-	installed = determineIfPackageManagerInstalled("dpkg-query", beChatty)
+	installed = determineIfPackageManagerInstalled("dpkg-query", logger)
 	if installed {
 		os = "debian"
 		return os, nil
@@ -50,20 +50,16 @@ func DetectPackageManager(verbose ...bool) (string, error) {
 	}
 }
 
-func determineIfPackageManagerInstalled(packageManager string, beChatty bool) bool {
+func determineIfPackageManagerInstalled(packageManager string, logger *logrus.Logger) bool {
 	cmd := execCommand("which", packageManager)
 	var waitStatus syscall.WaitStatus
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		if beChatty == true {
-			os.Stderr.WriteString(fmt.Sprintf("Error: %s\n", err.Error()))
-			fmt.Println(string(output))
-		}
+		logger.Errorf("Error: %s\n", err.Error())
+		logger.Infof(string(output))
 		if exitError, ok := err.(*exec.ExitError); ok {
 			waitStatus = exitError.Sys().(syscall.WaitStatus)
-			if beChatty == true {
-				fmt.Printf("Output 1: %s\n", []byte(fmt.Sprintf("%d", waitStatus.ExitStatus())))
-			}
+			logger.Infof("Output 1: %s\n", []byte(fmt.Sprintf("%d", waitStatus.ExitStatus())))
 			if waitStatus == 0 {
 				return true
 			}else{
@@ -75,10 +71,8 @@ func determineIfPackageManagerInstalled(packageManager string, beChatty bool) bo
 	} else {
 		// Success
 		waitStatus = cmd.ProcessState.Sys().(syscall.WaitStatus)
-		if beChatty == true {
-			fmt.Println(string(output))
-			fmt.Printf("Output 2: %s\n", []byte(fmt.Sprintf("%d", waitStatus.ExitStatus())))
-		}
+		logger.Info(string(output))
+		logger.Infof("Output 2: %s\n", []byte(fmt.Sprintf("%d", waitStatus.ExitStatus())))
 		if waitStatus == 0 {
 			return true
 		}else{

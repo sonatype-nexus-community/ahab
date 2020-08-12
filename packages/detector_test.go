@@ -19,6 +19,9 @@ import (
 	"os"
 	"os/exec"
 	"testing"
+
+	"github.com/sirupsen/logrus"
+	"github.com/sonatype-nexus-community/ahab/logger"
 )
 
 var testType string
@@ -94,7 +97,8 @@ func TestDetectPackageManager(t *testing.T) {
 			execCommand = fakeExecCommand
 			defer func() { execCommand = exec.Command }()
 
-			actualResult, actualErr := DetectPackageManager(true)
+			log, _ := logger.GetLogger(logrus.TraceLevel)
+			actualResult, actualErr := DetectPackageManager(log)
 
 			if actualResult != test.expectedResult {
 				t.Errorf("Expected %q, got %q", test.expectedResult, actualResult)

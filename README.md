@@ -27,9 +27,10 @@
 
 # Ahab
 
-`ahab` is a tool to check for vulnerabilities in your apt or yum powered operating systems, powered by [Sonatype OSS Index](https://ossindex.sonatype.org/).
+`ahab` is a tool to check for vulnerabilities in your apt, apk or yum powered operating systems, powered by [Sonatype OSS Index](https://ossindex.sonatype.org/).
 
-`ahab` currently works for images that use `apt`, `apk` or `yum` for package management.
+`ahab` currently works for images that use `apt`, `apk` or `yum` for package management and will do its best to auto detect which package 
+manager is being used by your os.
 
 ## Why is this useful?
 
@@ -120,9 +121,9 @@ Usage:
 
 Examples:
 
-        dpkg-query --show --showformat='${Package} ${Version}\n' | ./ahab chase --os debian
-        yum list installed | ./ahab chase --os fedora
-        apk info -vv | sort | ./ahab chase --os alpine
+        dpkg-query --show --showformat='${Package} ${Version}\n' | ./ahab chase
+        yum list installed | ./ahab chase
+        apk info -vv | sort | ./ahab chase
 
 
 Flags:
@@ -131,7 +132,7 @@ Flags:
   -h, --help            help for chase
       --loud            Specify if you want non vulnerable packages included in your output
       --no-color        Specify if you want no color in your results
-      --os string       Specify a value for the operating system type you want to scan (alpine, debian, fedora) (default "debian")
+      --os string       Specify a value for the operating system type you want to scan (alpine, debian, fedora). Useful if autodetection fails and/or you want to explicitly set it.
       --output string   Specify the output type you want (json, text, csv) (default "text")
       --quiet           Quiet removes the header from being printed
       --token string    Specify your OSS Index API Token
@@ -197,9 +198,9 @@ Usage:
 
 Examples:
 
-        dpkg-query --show --showformat='${Package} ${Version}\n' | ./ahab iq --os debian --application testapp
-        yum list installed | ./ahab iq --os fedora --application testapp
-        apk info -vv | sort | ./ahab iq --os alpine     --application testapp
+        dpkg-query --show --showformat='${Package} ${Version}\n' | ./ahab iq --application testapp
+        yum list installed | ./ahab iq --application testapp
+        apk info -vv | sort | ./ahab iq --application testapp
 
 
 Flags:
@@ -208,7 +209,7 @@ Flags:
   -h, --help                     help for iq
       --host string              Specify Nexus IQ Server URL (default "http://localhost:8070")
       --max-retries int          Specify maximum number of tries to poll Nexus IQ Server (default 300)
-      --os string                Specify a value for the operating system type you want to scan (alpine, debian, fedora) (default "debian")
+      --os string                Specify a value for the operating system type you want to scan (alpine, debian, fedora). Useful if autodetection fails and/or you want to explicitly set it.
       --oss-index-token string   Specify your OSS Index API Token
       --oss-index-user string    Specify your OSS Index Username
       --quiet                    Quiet removes the header from being printed
@@ -230,8 +231,6 @@ At current time you have a few options:
 TBD
 
 ### Build from source
-
-TBD
 
 ```
 $ export GO111MODULE=on

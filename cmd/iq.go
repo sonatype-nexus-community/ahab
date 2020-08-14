@@ -22,6 +22,7 @@ import (
 
 	"github.com/sonatype-nexus-community/ahab/buildversion"
 	"github.com/sonatype-nexus-community/ahab/logger"
+	"github.com/sonatype-nexus-community/ahab/packages"
 	"github.com/sonatype-nexus-community/go-sona-types/iq"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -41,7 +42,7 @@ func init() {
 	rootCmd.AddCommand(iqCmd)
 
 	pf := iqCmd.PersistentFlags()
-	pf.StringVar(&operating, "os", "debian", "Specify a value for the operating system type you want to scan (alpine, debian, fedora)")
+	pf.StringVar(&operating, "os", "", "Specify a value for the operating system type you want to scan (alpine, debian, fedora). Useful if autodetection fails and/or you want to explicitly set it.")
 	pf.StringVar(&iqUsername, "user", "admin", "Specify Nexus IQ Username for request")
 	pf.StringVar(&iqToken, "token", "admin123", "Specify Nexus IQ Token/Password for request")
 	pf.StringVar(&ossIndexUser, "oss-index-user", "", "Specify your OSS Index Username")
@@ -58,9 +59,9 @@ var iqCmd = &cobra.Command{
 	Use:   "iq",
 	Short: "iq is used for auditing your projects with Nexus IQ Server",
 	Example: `
-	dpkg-query --show --showformat='${Package} ${Version}\n' | ./ahab iq --os debian --application testapp
-	yum list installed | ./ahab iq --os fedora --application testapp
-	apk info -vv | sort | ./ahab iq --os alpine	--application testapp
+	dpkg-query --show --showformat='${Package} ${Version}\n' | ./ahab iq --application testapp
+	yum list installed | ./ahab iq --application testapp
+	apk info -vv | sort | ./ahab iq	--application testapp
 	`,
 	SilenceErrors: true,
 	SilenceUsage:  true,
@@ -108,6 +109,17 @@ var iqCmd = &cobra.Command{
 				DBCacheName:   "ahab-cache",
 				MaxRetries:    maxRetries,
 			})
+
+
+		if operating == "" {
+			logLady.Trace("Attempting to detect os for you")
+			manager, err := packages.DetectPackageManager(logLady)
+			if err != nil {
+				logLady.Error(err)
+				panic(err)
+			}
+			operating = manager
+		}
 
 		pkgs, err := parseStdIn(&operating)
 		if err != nil {

@@ -73,7 +73,7 @@ var (
 
 func init() {
 	rootCmd.AddCommand(chaseCmd)
-	chaseCmd.PersistentFlags().StringVar(&operating, "os", "debian", "Specify a value for the operating system type you want to scan (alpine, debian, fedora)")
+	chaseCmd.PersistentFlags().StringVar(&operating, "os", "", "Specify a value for the operating system type you want to scan (alpine, debian, fedora). Useful if autodetection fails and/or you want to explicitly set it.")
 	chaseCmd.PersistentFlags().BoolVar(&cleanCache, "clean-cache", false, "Flag to clean the database cache for OSS Index")
 	chaseCmd.PersistentFlags().StringVar(&ossIndexUser, "user", "", "Specify your OSS Index Username")
 	chaseCmd.PersistentFlags().StringVar(&ossIndexToken, "token", "", "Specify your OSS Index API Token")
@@ -90,9 +90,9 @@ var chaseCmd = &cobra.Command{
 	Use:   "chase",
 	Short: "chase is used for auditing projects with OSS Index",
 	Example: `
-	dpkg-query --show --showformat='${Package} ${Version}\n' | ./ahab chase --os debian
-	yum list installed | ./ahab chase --os fedora
-	apk info -vv | sort | ./ahab chase --os alpine
+	dpkg-query --show --showformat='${Package} ${Version}\n' | ./ahab chase
+	yum list installed | ./ahab chase
+	apk info -vv | sort | ./ahab chase
 	`,
 	SilenceErrors: true,
 	SilenceUsage:  true,
@@ -139,6 +139,17 @@ var chaseCmd = &cobra.Command{
 		}
 
 		err = getCVEExcludesFromFile(excludeVulnerabilityFilePath)
+
+		if operating == "" {
+			logLady.Trace("Attempting to detect os for you")
+			manager, err := packages.DetectPackageManager(logLady)
+			if err != nil {
+				logLady.Error(err)
+				panic(err)
+			}
+			operating = manager
+		}
+
 
 		logLady.Trace("Attempting to audit list of strings from standard in")
 		pkgs, err := parseStdIn(&operating)

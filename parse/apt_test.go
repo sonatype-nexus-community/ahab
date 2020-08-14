@@ -261,7 +261,9 @@ vim-runtime 2:8.0.1453-1ubuntu1.1
 xdg-user-dirs 0.17-1ubuntu1
 xxd 2:8.0.1453-1ubuntu1.1
 xz-utils 5.2.2-1.3
-zlib1g 1:1.2.11.dfsg-0ubuntu2`
+zlib1g 1:1.2.11.dfsg-0ubuntu2
+
+`
 
 var dpkgListArray = strings.Split(dpkgList, "\n")
 

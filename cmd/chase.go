@@ -92,6 +92,7 @@ var chaseCmd = &cobra.Command{
 	Example: `
 	dpkg-query --show --showformat='${Package} ${Version}\n' | ./ahab chase
 	yum list installed | ./ahab chase
+	dnf list installed | ./ahab chase
 	apk info -vv | sort | ./ahab chase
 	`,
 	SilenceErrors: true,
@@ -158,7 +159,7 @@ var chaseCmd = &cobra.Command{
 			panic(err)
 		}
 
-		logLady.Trace("Attempting to extract purls from Project List")
+		logLady.WithField("os", operating).Trace("Attempting to extract purls from Project List")
 		purls := pkgs.ExtractPurlsFromProjectList(operating)
 
 		logLady.Trace("Attempting to Audit Packages with OSS Index")
@@ -201,19 +202,52 @@ func parseStdInList(list []string, operating *string) (packages.IPackage, error)
 	thing := *operating
 	switch thing {
 	case "debian":
-		logLady.Trace("Chasing Debian")
+		logLady.WithFields(logrus.Fields{
+			"list": list,
+		}).Trace("Chasing Debian")
+
 		var aptResult packages.Apt
 		aptResult.ProjectList = parse.ParseDpkgList(list)
+
+		logLady.WithFields(logrus.Fields{
+			"project_list": aptResult.ProjectList,
+		}).Trace("Obtained apt project list")
 		return aptResult, nil
 	case "alpine":
-		logLady.Trace("Chasing Alpine")
+		logLady.WithFields(logrus.Fields{
+			"list": list,
+		}).Trace("Chasing Alpine")
+
 		var apkResult packages.Apk
 		apkResult.ProjectList = parse.ParseApkShow(list)
+
+		logLady.WithFields(logrus.Fields{
+			"project_list": apkResult.ProjectList,
+		}).Trace("Obtained apk project list")
 		return apkResult, nil
+	case "fedora":
+		logLady.WithFields(logrus.Fields{
+			"list": list,
+		}).Trace("Chasing Fedora")
+
+		var dnfResult packages.Yum
+		dnfResult.ProjectList = parse.ParseYumListFromStdIn(list)
+
+		logLady.WithFields(logrus.Fields{
+			"project_list": dnfResult.ProjectList,
+		}).Trace("Obtained dnf project list")
+		return dnfResult, nil
 	default:
-		logLady.Trace("Chasing Yum")
+		logLady.WithFields(logrus.Fields{
+			"list": list,
+		}).Trace("Chasing Yum")
+
 		var yumResult packages.Yum
 		yumResult.ProjectList = parse.ParseYumListFromStdIn(list)
+
+		logLady.WithFields(logrus.Fields{
+			"project_list": yumResult.ProjectList,
+		}).Trace("Obtained yum project list")
 		return yumResult, nil
 	}
 }

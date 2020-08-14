@@ -15,7 +15,10 @@ func TestMain(m *testing.M) {
 	}
 	exitVal := m.Run()
 
-	teardownSubtest()
+	err := teardownSubtest()
+	if err != nil {
+		fmt.Printf("welp teardown went terribly...not sure if it matters or not but here is your error: %v", err)
+	}
 
 	os.Exit(exitVal)
 }

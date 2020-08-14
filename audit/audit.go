@@ -211,6 +211,14 @@ func formatPackage(sb *strings.Builder, noColor bool, idx int, packageCount int,
 func formatVulnerability(sb *strings.Builder, noColor bool, idx int, packageCount int, coordinate types.Coordinate) (err error) {
 	au := aurora.NewAurora(!noColor)
 
+	var numVulns int
+
+	for _, v := range coordinate.Vulnerabilities {
+		if !v.Excluded {
+			numVulns++
+		}
+	}
+
 	_, err = sb.WriteString(fmt.Sprintf(
 		"[%d/%d]\t%s\n%s \n",
 		idx,

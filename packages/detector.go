@@ -24,7 +24,7 @@ import (
 
 var execCommand = exec.Command
 
-const SupportedPackageManagers = "supported package managers are dpkg-query, apk or yum, could not find any. Possible issues: 1.) dpkg-query, apk or yum is not installed. 2.) 'which' program is not installed to do auto detection"
+const SupportedPackageManagers = "supported package managers are dpkg-query, apk yum or dnf, could not find any. Possible issues: 1.) dpkg-query, apk, yum or dnf is not installed. 2.) 'which' program is not installed to do auto detection"
 
 func DetectPackageManager(logger *logrus.Logger) (string, error) {
 	var os string
@@ -35,10 +35,16 @@ func DetectPackageManager(logger *logrus.Logger) (string, error) {
 		os = "alpine"
 		return os, nil
 	}
-	installed = determineIfPackageManagerInstalled("yum", logger)
+	installed = determineIfPackageManagerInstalled("dnf", logger)
 	if installed {
 		//Having this be OS is a little weird. It probably should have been just package manager based flag.
 		os = "fedora"
+		return os, nil
+	}
+	installed = determineIfPackageManagerInstalled("yum", logger)
+	if installed {
+		//Having this be OS is a little weird. It probably should have been just package manager based flag.
+		os = "older-fedora"
 		return os, nil
 	}
 	installed = determineIfPackageManagerInstalled("dpkg-query", logger)

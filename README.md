@@ -66,21 +66,27 @@ Ubuntu
 
 ```
 $ GOOS=linux GOARCH=amd64 go build 
-$ docker build -f Dockerfile.ubuntu . -t test
+$ docker build -f docker/dpkg-query-autodetect/Dockerfile . -t test
 ```
 
-Fedora
+Fedora older (yum based)
 
 ```
 $ GOOS=linux GOARCH=amd64 go build 
-$ docker build -f Dockerfile.fedora . -t test
+$ docker build -f docker/yum-autodetect/Dockerfile . -t test
+```
+
+Fedora latest (dnf based)
+```
+$ GOOS=linux GOARCH=amd64 go build 
+$ docker build -f docker/dnf-autodetect/Dockerfile . -t test
 ```
 
 Alpine
 
 ```
 $ GOOS=linux GOARCH=amd64 go build 
-$ docker build -f Dockerfile.alpine . -t test
+$ docker build -f docker/apk-autodetect/Dockerfile . -t test
 ```
 
 Depending on the OS, you'll see Ahab run and fail (Ubuntu and Fedora) or succeed (Alpine).

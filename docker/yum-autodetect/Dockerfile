@@ -2,7 +2,10 @@ FROM centos:7
 
 WORKDIR /ahab-docker
 
-RUN yum -y install epel-release which python3-pip
+RUN yum -y install epel-release python3-pip
+
+#Required for autodetect to work
+RUN yum -y install which
 
 COPY ahab .
 

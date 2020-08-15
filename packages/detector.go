@@ -66,23 +66,18 @@ func determineIfPackageManagerInstalled(packageManager string, logger *logrus.Lo
 		if exitError, ok := err.(*exec.ExitError); ok {
 			waitStatus = exitError.Sys().(syscall.WaitStatus)
 			logger.Infof("Output 1: %s\n", []byte(fmt.Sprintf("%d", waitStatus.ExitStatus())))
-			if waitStatus == 0 {
+			if waitStatus.ExitStatus() == 0 {
 				return true
-			}else{
-				return false
 			}
-		}else{
 			return false
 		}
-	} else {
-		// Success
-		waitStatus = cmd.ProcessState.Sys().(syscall.WaitStatus)
-		logger.Info(string(output))
-		logger.Infof("Output 2: %s\n", []byte(fmt.Sprintf("%d", waitStatus.ExitStatus())))
-		if waitStatus == 0 {
-			return true
-		}else{
-			return false
-		}
+		return false
 	}
+	waitStatus = cmd.ProcessState.Sys().(syscall.WaitStatus)
+	logger.Info(string(output))
+	logger.Infof("Output 2: %s\n", []byte(fmt.Sprintf("%d", waitStatus.ExitStatus())))
+	if waitStatus.ExitStatus() == 0 {
+		return true
+	}
+	return false
 }

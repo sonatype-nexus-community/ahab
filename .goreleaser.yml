@@ -27,7 +27,6 @@ builds:
       - CGO_ENABLED=0
     goos:
       - linux
-      - darwin
       - windows
     goarch:
       - amd64
@@ -59,4 +58,3 @@ release:
   github:
     owner: sonatype-nexus-community
     name: ahab
-  

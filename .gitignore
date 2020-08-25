@@ -26,3 +26,6 @@ tags
 [._]*.un~
 
 .cache
+
+# ci config for local ci build
+.circleci/local-config.yml

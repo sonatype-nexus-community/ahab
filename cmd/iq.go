@@ -42,7 +42,8 @@ func init() {
 	rootCmd.AddCommand(iqCmd)
 
 	pf := iqCmd.PersistentFlags()
-	pf.StringVar(&operating, "os", "", "Specify a value for the operating system type you want to scan (alpine, debian, fedora). Useful if autodetection fails and/or you want to explicitly set it.")
+	pf.StringVar(&packageManager, "os", "", "Specify a value for the operating system type you want to scan (alpine, debian, fedora). Useful if autodetection fails and/or you want to explicitly set it.")
+	pf.StringVar(&packageManager, "package-manager", "", "Specify package manager type you want to scan (apk, dnf, dpkg or yum). Useful if autodetection fails and/or you want to explicitly set it.")
 	pf.StringVar(&iqUsername, "user", "admin", "Specify Nexus IQ Username for request")
 	pf.StringVar(&iqToken, "token", "admin123", "Specify Nexus IQ Token/Password for request")
 	pf.StringVar(&ossIndexUser, "oss-index-user", "", "Specify your OSS Index Username")
@@ -53,6 +54,8 @@ func init() {
 	pf.StringVar(&stage, "stage", "develop", "Specify stage for application")
 	pf.IntVar(&maxRetries, "max-retries", 300, "Specify maximum number of tries to poll Nexus IQ Server")
 	pf.CountVarP(&verbose, "", "v", "Set log level, higher is more verbose")
+
+	iqCmd.Flag("os").Deprecated = "use package-manager"
 }
 
 var iqCmd = &cobra.Command{
@@ -111,24 +114,23 @@ var iqCmd = &cobra.Command{
 				MaxRetries:    maxRetries,
 			})
 
-
-		if operating == "" {
-			logLady.Trace("Attempting to detect os for you")
+		if packageManager == "" {
+			logLady.Trace("Attempting to detect package manager for you")
 			manager, err := packages.DetectPackageManager(logLady)
 			if err != nil {
 				logLady.Error(err)
 				panic(err)
 			}
-			operating = manager
+			packageManager = manager
 		}
 
-		pkgs, err := parseStdIn(&operating)
+		pkgs, err := parseStdIn(&packageManager)
 		if err != nil {
 			logLady.Error(err)
 			panic(err)
 		}
 
-		purls := pkgs.ExtractPurlsFromProjectList(operating)
+		purls := pkgs.ExtractPurlsFromProjectList()
 
 		res, err := lifecycle.AuditPackages(purls, application)
 		if err != nil {

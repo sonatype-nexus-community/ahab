@@ -56,7 +56,7 @@ func (cve *CveListFlag) Set(value string) error {
 func (cve *CveListFlag) Type() string { return "CveListFlag" }
 
 var (
-	operating                    string
+	packageManager               string
 	cleanCache                   bool
 	ossIndexUser                 string
 	ossIndexToken                string
@@ -73,17 +73,23 @@ var (
 
 func init() {
 	rootCmd.AddCommand(chaseCmd)
-	chaseCmd.PersistentFlags().StringVar(&operating, "os", "", "Specify a value for the operating system type you want to scan (alpine, debian, fedora). Useful if autodetection fails and/or you want to explicitly set it.")
-	chaseCmd.PersistentFlags().BoolVar(&cleanCache, "clean-cache", false, "Flag to clean the database cache for OSS Index")
-	chaseCmd.PersistentFlags().StringVar(&ossIndexUser, "user", "", "Specify your OSS Index Username")
-	chaseCmd.PersistentFlags().StringVar(&ossIndexToken, "token", "", "Specify your OSS Index API Token")
-	chaseCmd.PersistentFlags().StringVar(&output, "output", "text", "Specify the output type you want (json, text, csv)")
+
+	pf := chaseCmd.PersistentFlags()
+	pf.StringVar(&packageManager, "os", "", "Specify a value for the operating system type you want to scan (alpine, debian, fedora). Useful if autodetection fails and/or you want to explicitly set it.")
+	pf.StringVar(&packageManager, "package-manager", "", "Specify package manager type you want to scan (apk, dnf, dpkg or yum). Useful if autodetection fails and/or you want to explicitly set it.")
+	pf.BoolVar(&cleanCache, "clean-cache", false, "Flag to clean the database cache for OSS Index")
+	pf.StringVar(&ossIndexUser, "user", "", "Specify your OSS Index Username")
+	pf.StringVar(&ossIndexToken, "token", "", "Specify your OSS Index API Token")
+	pf.StringVar(&output, "output", "text", "Specify the output type you want (json, text, csv)")
+	pf.BoolVar(&loud, "loud", false, "Specify if you want non vulnerable packages included in your output")
+	pf.BoolVar(&quiet, "quiet", false, "Quiet removes the header from being printed")
+	pf.BoolVar(&noColor, "no-color", false, "Specify if you want no color in your results")
+	pf.CountVarP(&verbose, "", "v", "Set log level, higher is more verbose")
+
 	chaseCmd.Flags().VarP(&cveList, "exclude-vulnerability", "e", "Comma separated list of CVEs to exclude")
-	chaseCmd.PersistentFlags().BoolVar(&loud, "loud", false, "Specify if you want non vulnerable packages included in your output")
-	chaseCmd.PersistentFlags().BoolVar(&quiet, "quiet", false, "Quiet removes the header from being printed")
-	chaseCmd.PersistentFlags().BoolVar(&noColor, "no-color", false, "Specify if you want no color in your results")
-	chaseCmd.PersistentFlags().CountVarP(&verbose, "", "v", "Set log level, higher is more verbose")
 	chaseCmd.Flags().StringVarP(&excludeVulnerabilityFilePath, "exclude-vulnerability-file", "x", "./.ahab-ignore", "Path to a file containing newline separated CVEs to be excluded")
+
+	chaseCmd.Flag("os").Deprecated = "use package-manager"
 }
 
 var chaseCmd = &cobra.Command{
@@ -141,26 +147,25 @@ var chaseCmd = &cobra.Command{
 
 		err = getCVEExcludesFromFile(excludeVulnerabilityFilePath)
 
-		if operating == "" {
-			logLady.Trace("Attempting to detect os for you")
+		if packageManager == "" {
+			logLady.Trace("Attempting to detect package manager for you")
 			manager, err := packages.DetectPackageManager(logLady)
 			if err != nil {
 				logLady.Error(err)
 				panic(err)
 			}
-			operating = manager
+			packageManager = manager
 		}
 
-
 		logLady.Trace("Attempting to audit list of strings from standard in")
-		pkgs, err := parseStdIn(&operating)
+		pkgs, err := parseStdIn(&packageManager)
 		if err != nil {
 			logLady.Error(err)
 			panic(err)
 		}
 
-		logLady.WithField("os", operating).Trace("Attempting to extract purls from Project List")
-		purls := pkgs.ExtractPurlsFromProjectList(operating)
+		logLady.WithField("package-manager", packageManager).Trace("Attempting to extract purls from Project List")
+		purls := pkgs.ExtractPurlsFromProjectList()
 
 		logLady.Trace("Attempting to Audit Packages with OSS Index")
 		coordinates, err := ossi.AuditPackages(purls)
@@ -198,13 +203,13 @@ func getLogger(level int) (*logrus.Logger, error) {
 	}
 }
 
-func parseStdInList(list []string, operating *string) (packages.IPackage, error) {
-	thing := *operating
+func parseStdInList(list []string, packageManager *string) (packages.IPackage, error) {
+	thing := *packageManager
 	switch thing {
-	case "debian":
+	case "dpkg":
 		logLady.WithFields(logrus.Fields{
 			"list": list,
-		}).Trace("Chasing Debian")
+		}).Trace("Chasing dpkg")
 
 		var aptResult packages.Apt
 		aptResult.ProjectList = parse.ParseDpkgList(list)
@@ -213,10 +218,10 @@ func parseStdInList(list []string, operating *string) (packages.IPackage, error)
 			"project_list": aptResult.ProjectList,
 		}).Trace("Obtained apt project list")
 		return aptResult, nil
-	case "alpine":
+	case "apk":
 		logLady.WithFields(logrus.Fields{
 			"list": list,
-		}).Trace("Chasing Alpine")
+		}).Trace("Chasing apk")
 
 		var apkResult packages.Apk
 		apkResult.ProjectList = parse.ParseApkShow(list)
@@ -225,10 +230,10 @@ func parseStdInList(list []string, operating *string) (packages.IPackage, error)
 			"project_list": apkResult.ProjectList,
 		}).Trace("Obtained apk project list")
 		return apkResult, nil
-	case "fedora":
+	case "yum", "dnf":
 		logLady.WithFields(logrus.Fields{
 			"list": list,
-		}).Trace("Chasing Fedora")
+		}).Trace("Chasing dnf")
 
 		var dnfResult packages.Yum
 		dnfResult.ProjectList = parse.ParseYumListFromStdIn(list)
@@ -240,7 +245,7 @@ func parseStdInList(list []string, operating *string) (packages.IPackage, error)
 	default:
 		logLady.WithFields(logrus.Fields{
 			"list": list,
-		}).Trace("Chasing Yum")
+		}).Trace("Chasing yum")
 
 		var yumResult packages.Yum
 		yumResult.ProjectList = parse.ParseYumListFromStdIn(list)
@@ -252,7 +257,7 @@ func parseStdInList(list []string, operating *string) (packages.IPackage, error)
 	}
 }
 
-func parseStdIn(operating *string) (packages.IPackage, error) {
+func parseStdIn(packageManager *string) (packages.IPackage, error) {
 	fi, err := os.Stdin.Stat()
 	if err != nil {
 		return nil, err
@@ -270,7 +275,7 @@ func parseStdIn(operating *string) (packages.IPackage, error) {
 		return nil, err
 	}
 
-	return parseStdInList(list, operating)
+	return parseStdInList(list, packageManager)
 }
 
 func printHeader() {

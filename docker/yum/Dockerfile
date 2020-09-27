@@ -9,5 +9,5 @@ COPY ahab .
 # Spit out these just for easier debugging
 RUN yum list installed
 
-RUN yum list installed | ./ahab chase --os fedora
+RUN yum list installed | ./ahab chase --package-manager yum
 

@@ -9,5 +9,5 @@ COPY ahab .
 # Spit out these just for easier debugging
 RUN dnf list installed
 
-RUN dnf list installed | ./ahab chase --os fedora
+RUN dnf list installed | ./ahab chase --package-manager dnf
 

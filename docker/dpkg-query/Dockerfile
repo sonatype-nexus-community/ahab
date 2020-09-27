@@ -9,5 +9,5 @@ COPY ahab .
 # Spit out these just for easier debugging
 RUN dpkg-query --show --showformat='${Package} ${Version}\n'
 
-RUN dpkg-query --show --showformat='${Package} ${Version}\n' | ./ahab chase --os debian
+RUN dpkg-query --show --showformat='${Package} ${Version}\n' | ./ahab chase --package-manager dpkg
 

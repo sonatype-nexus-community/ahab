@@ -9,4 +9,4 @@ COPY ahab .
 # Spit out these just for easier debugging
 RUN apk info -vv | sort
 
-RUN apk info -vv | sort | ./ahab chase --os alpine
+RUN apk info -vv | sort | ./ahab chase --package-manager apk

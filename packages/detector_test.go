@@ -94,10 +94,10 @@ func TestDetectPackageManager(t *testing.T) {
 		expectedResult                  string
 		expectedErr                     error
 	}{
-		"apk":            {expectedInstalledPackageManager: "apkinstalled", expectedResult: "alpine", expectedErr: nil},
-		"yum":            {expectedInstalledPackageManager: "yuminstalled", expectedResult: "older-fedora", expectedErr: nil},
-		"dnf":            {expectedInstalledPackageManager: "dnfinstalled", expectedResult: "fedora", expectedErr: nil},
-		"dpkg-query":     {expectedInstalledPackageManager: "dpkgqueryinstalled", expectedResult: "debian", expectedErr: nil},
+		"apk":            {expectedInstalledPackageManager: "apkinstalled", expectedResult: "apk", expectedErr: nil},
+		"yum":            {expectedInstalledPackageManager: "yuminstalled", expectedResult: "yum", expectedErr: nil},
+		"dnf":            {expectedInstalledPackageManager: "dnfinstalled", expectedResult: "dnf", expectedErr: nil},
+		"dpkg-query":     {expectedInstalledPackageManager: "dpkgqueryinstalled", expectedResult: "dpkg", expectedErr: nil},
 		"none installed": {expectedInstalledPackageManager: "notinstalled", expectedResult: "", expectedErr: errors.New(SupportedPackageManagers)},
 	}
 

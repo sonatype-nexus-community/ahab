@@ -28,7 +28,7 @@ type Yum struct {
 
 func (y Yum) ExtractPurlsFromProjectList() (purls []string) {
 	for _, s := range y.ProjectList.Projects {
-		var purl = fmt.Sprintf("pkg:rpm/fedora/%s@%s", s.Name, s.Version)
+		var purl = fmt.Sprintf("pkg:rpm/%s@%s", s.Name, s.Version)
 		purls = append(purls, purl)
 	}
 	return

@@ -205,12 +205,11 @@ func getLogger(level int) (*logrus.Logger, error) {
 
 func parseStdInList(list []string, packageManager *string) (packages.IPackage, error) {
 	thing := *packageManager
+	logLady.WithFields(logrus.Fields{
+		"list": list,
+	}).Trace("Chasing ", thing)
 	switch thing {
 	case "dpkg":
-		logLady.WithFields(logrus.Fields{
-			"list": list,
-		}).Trace("Chasing dpkg")
-
 		var aptResult packages.Apt
 		aptResult.ProjectList = parse.ParseDpkgList(list)
 
@@ -219,10 +218,6 @@ func parseStdInList(list []string, packageManager *string) (packages.IPackage, e
 		}).Trace("Obtained apt project list")
 		return aptResult, nil
 	case "apk":
-		logLady.WithFields(logrus.Fields{
-			"list": list,
-		}).Trace("Chasing apk")
-
 		var apkResult packages.Apk
 		apkResult.ProjectList = parse.ParseApkShow(list)
 
@@ -231,10 +226,6 @@ func parseStdInList(list []string, packageManager *string) (packages.IPackage, e
 		}).Trace("Obtained apk project list")
 		return apkResult, nil
 	case "yum", "dnf":
-		logLady.WithFields(logrus.Fields{
-			"list": list,
-		}).Trace("Chasing dnf")
-
 		var dnfResult packages.Yum
 		dnfResult.ProjectList = parse.ParseYumListFromStdIn(list)
 
@@ -243,16 +234,12 @@ func parseStdInList(list []string, packageManager *string) (packages.IPackage, e
 		}).Trace("Obtained dnf project list")
 		return dnfResult, nil
 	default:
-		logLady.WithFields(logrus.Fields{
-			"list": list,
-		}).Trace("Chasing yum")
-
 		var yumResult packages.Yum
 		yumResult.ProjectList = parse.ParseYumListFromStdIn(list)
 
 		logLady.WithFields(logrus.Fields{
 			"project_list": yumResult.ProjectList,
-		}).Trace("Obtained yum project list")
+		}).Trace("Obtained yum project list (default case)")
 		return yumResult, nil
 	}
 }

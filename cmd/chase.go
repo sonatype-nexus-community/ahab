@@ -209,15 +209,15 @@ func parseStdInList(list []string, packageManager *string) (packages.IPackage, e
 		"list": list,
 	}).Trace("Chasing ", thing)
 	switch thing {
-	case "dpkg":
+	case "dpkg", "debian":
 		var aptResult packages.Apt
 		aptResult.ProjectList = parse.ParseDpkgList(list)
 
 		logLady.WithFields(logrus.Fields{
 			"project_list": aptResult.ProjectList,
-		}).Trace("Obtained apt project list")
+		}).Trace("Obtained dpkg project list")
 		return aptResult, nil
-	case "apk":
+	case "apk", "alpine":
 		var apkResult packages.Apk
 		apkResult.ProjectList = parse.ParseApkShow(list)
 
@@ -225,7 +225,7 @@ func parseStdInList(list []string, packageManager *string) (packages.IPackage, e
 			"project_list": apkResult.ProjectList,
 		}).Trace("Obtained apk project list")
 		return apkResult, nil
-	case "yum", "dnf":
+	case "yum", "dnf", "fedora":
 		var dnfResult packages.Yum
 		dnfResult.ProjectList = parse.ParseYumListFromStdIn(list)
 

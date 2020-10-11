@@ -21,14 +21,11 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"regexp"
 	"strconv"
 
 	"github.com/sirupsen/logrus"
 )
-
-var execCommand = exec.Command
 
 // SupportedPackageManagers represents the standard error string used
 // when OS package maanger can not be identified.

@@ -56,16 +56,16 @@ func DetectPackageManager(logger *logrus.Logger) (string, error) {
 	switch string(id) {
 	case "alpine":
 		packageManager = "apk"
-	case "debian", "ubuntu", "mint":
+	case "debian", "ubuntu":
 		packageManager = "dpkg"
-	case "fedora", "centos", "rhel", "redhat":
-		if string(id) == "fedora" {
-			if v, _ := strconv.Atoi(string(version)); v <= 22 {
-				packageManager = "yum"
-				break
-			}
-		}
+	case "centos":
 		if v, _ := strconv.Atoi(string(version)); v <= 7 {
+			packageManager = "yum"
+			break
+		}
+		packageManager = "dnf"
+	case "fedora":
+		if v, _ := strconv.Atoi(string(version)); v <= 22 {
 			packageManager = "yum"
 			break
 		}

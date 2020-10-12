@@ -31,9 +31,6 @@ const SupportedPackageManagers = "No supported package manager could be auto det
 
 // DetectPackageManager parses os-release file to determine package
 // manager based on distribution ID.
-//
-// Optional release short circuits os-release parsing to force
-// appropriate package manager.
 func DetectPackageManager(logger *logrus.Logger) (string, error) {
 	var packageManager string
 

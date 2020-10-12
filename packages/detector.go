@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package packages implements package manager detection and package
-// manager specific output formatting.
 package packages
 
 import (
@@ -28,45 +26,31 @@ import (
 )
 
 // SupportedPackageManagers represents the standard error string used
-// when OS package maanger can not be identified.
-const SupportedPackageManagers = "No supported package manager found; apk, dpkg, dnf or yum installed?"
-
-// Release allows tests to inject ID and VERSION_ID typically
-// parsed from os-release.
-type Release struct {
-	ID      []byte
-	Version []byte
-}
+// when OS package manger can not be identified.
+const SupportedPackageManagers = "No supported package manager could be auto detected. Supported versions are apk, dpkg, dnf or yum."
 
 // DetectPackageManager parses os-release file to determine package
 // manager based on distribution ID.
 //
 // Optional release short circuits os-release parsing to force
 // appropriate package manager.
-func DetectPackageManager(logger *logrus.Logger, r ...Release) (string, error) {
+func DetectPackageManager(logger *logrus.Logger) (string, error) {
 	var packageManager string
-	var id []byte
-	var version []byte
 
-	if len(r) == 0 {
-		data, err := readReleaseFile()
-		if err != nil {
-			return packageManager, err
-		}
-		raw := bytes.Split(data, []byte("\n"))
+	data, err := readReleaseFile()
+	if err != nil {
+		return packageManager, err
+	}
+	raw := bytes.Split(data, []byte("\n"))
 
-		id, err = parseField(raw, "ID")
-		if err != nil {
-			return packageManager, err
-		}
+	id, err := parseField(raw, "ID")
+	if err != nil {
+		return packageManager, err
+	}
 
-		version, err = parseField(raw, "VERSION_ID")
-		if err != nil {
-			return packageManager, err
-		}
-	} else {
-		id = r[0].ID
-		version = r[0].Version
+	version, err := parseField(raw, "VERSION_ID")
+	if err != nil {
+		return packageManager, err
 	}
 
 	switch string(id) {

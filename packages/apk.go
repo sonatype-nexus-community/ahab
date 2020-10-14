@@ -26,7 +26,7 @@ type Apk struct {
 	ProjectList parse.ProjectList
 }
 
-func (a Apk) ExtractPurlsFromProjectList(operating string) (purls []string) {
+func (a Apk) ExtractPurlsFromProjectList() (purls []string) {
 	for _, s := range a.ProjectList.Projects {
 		var purl = fmt.Sprintf("pkg:alpine/%s@%s", s.Name, s.Version)
 		purls = append(purls, purl)

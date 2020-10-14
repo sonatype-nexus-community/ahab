@@ -26,7 +26,7 @@ type Yum struct {
 	ProjectList parse.ProjectList
 }
 
-func (y Yum) ExtractPurlsFromProjectList(operating string) (purls []string) {
+func (y Yum) ExtractPurlsFromProjectList() (purls []string) {
 	for _, s := range y.ProjectList.Projects {
 		var purl = fmt.Sprintf("pkg:rpm/%s@%s", s.Name, s.Version)
 		purls = append(purls, purl)

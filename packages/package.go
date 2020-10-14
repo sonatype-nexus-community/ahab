@@ -17,5 +17,5 @@
 package packages
 
 type IPackage interface {
-	ExtractPurlsFromProjectList(string) []string
+	ExtractPurlsFromProjectList() []string
 }

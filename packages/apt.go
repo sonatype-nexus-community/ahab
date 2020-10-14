@@ -26,9 +26,9 @@ type Apt struct {
 	ProjectList parse.ProjectList
 }
 
-func (a Apt) ExtractPurlsFromProjectList(operating string) (purls []string) {
+func (a Apt) ExtractPurlsFromProjectList() (purls []string) {
 	for _, s := range a.ProjectList.Projects {
-		var purl = fmt.Sprintf("pkg:deb/%s/%s@%s", operating, s.Name, s.Version)
+		var purl = fmt.Sprintf("pkg:deb/debian/%s@%s", s.Name, s.Version)
 		purls = append(purls, purl)
 	}
 	return

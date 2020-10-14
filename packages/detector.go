@@ -25,44 +25,15 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-<<<<<<< HEAD
-var execCommand = exec.Command
-
-const SupportedPackageManagers = "Supported package managers are apk, dnf, dpkg or yum; could not find any. Possible issues: 1.) dpkg, apk, yum or dnf is not installed. 2.) 'which' program is not installed to do auto detection"
-=======
 // SupportedPackageManagers represents the standard error string used
 // when OS package manger can not be identified.
 const SupportedPackageManagers = "No supported package manager could be auto detected. Supported versions are apk, dpkg, dnf or yum."
->>>>>>> issue-35
 
 // DetectPackageManager parses os-release file to determine package
 // manager based on distribution ID.
 func DetectPackageManager(logger *logrus.Logger) (string, error) {
 	var packageManager string
 
-<<<<<<< HEAD
-	installed := determineIfPackageManagerInstalled("apk", logger)
-	if installed {
-		packageManager = "apk"
-		return packageManager, nil
-	}
-	installed = determineIfPackageManagerInstalled("dnf", logger)
-	if installed {
-		packageManager = "dnf"
-		return packageManager, nil
-	}
-	installed = determineIfPackageManagerInstalled("yum", logger)
-	if installed {
-		packageManager = "yum"
-		return packageManager, nil
-	}
-	installed = determineIfPackageManagerInstalled("dpkg-query", logger)
-	if installed {
-		packageManager = "dpkg"
-		return packageManager, nil
-	} else {
-		return packageManager, errors.New(SupportedPackageManagers)
-=======
 	data, err := readReleaseFile()
 	if err != nil {
 		return packageManager, err
@@ -100,7 +71,6 @@ func DetectPackageManager(logger *logrus.Logger) (string, error) {
 		err := errors.New(SupportedPackageManagers)
 		logger.Errorf("Error: %s\n", err.Error())
 		return packageManager, err
->>>>>>> issue-35
 	}
 
 	logger.Infof("Detected package manager: %s\n", packageManager)

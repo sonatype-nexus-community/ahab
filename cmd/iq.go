@@ -96,7 +96,7 @@ var iqCmd = &cobra.Command{
 			panic(err)
 		}
 
-		lifecycle = iq.New(logLady,
+		lifecycle, err = iq.New(logLady,
 			iq.Options{
 				User:          iqUsername,
 				Token:         iqToken,
@@ -110,7 +110,10 @@ var iqCmd = &cobra.Command{
 				DBCacheName:   "ahab-cache",
 				MaxRetries:    maxRetries,
 			})
-
+		if err != nil {
+			logLady.Error(err)
+			panic(err)
+		}
 
 		if operating == "" {
 			logLady.Trace("Attempting to detect os for you")
@@ -130,7 +133,7 @@ var iqCmd = &cobra.Command{
 
 		purls := pkgs.ExtractPurlsFromProjectList(operating)
 
-		res, err := lifecycle.AuditPackages(purls, application)
+		res, err := lifecycle.AuditPackages(purls)
 		if err != nil {
 			logLady.Error(err)
 			panic(err)

@@ -113,11 +113,14 @@ Usage:
 
 Available Commands:
   chase       chase is used for auditing projects with OSS Index
+  config      Setup credentials to use when connecting to services
   help        Help about any command
   iq          iq is used for auditing your projects with Nexus IQ Server
 
 Flags:
-  -h, --help   help for ahab
+  -h, --help              help for ahab
+  -t, --token string      Specify your OSS Index API Token
+  -u, --username string   Specify your OSS Index Username
 
 Use "ahab [command] --help" for more information about a command.
 ```
@@ -145,7 +148,9 @@ Examples:
 
         dpkg-query --show --showformat='${Package} ${Version}\n' | ./ahab chase
         yum list installed | ./ahab chase
+        dnf list installed | ./ahab chase
         apk info -vv | sort | ./ahab chase
+        
 
 Flags:
   -v, -- count                              Set log level, higher is more verbose
@@ -159,8 +164,10 @@ Flags:
       --output string                       Specify the output type you want (json, text, csv) (default "text")
       --package-manager string              Specify package manager type you want to scan (apk, dnf, dpkg or yum). Useful if autodetection fails and/or you want to explicitly set it.
       --quiet                               Quiet removes the header from being printed
-      --token string                        Specify your OSS Index API Token
-      --user string                         Specify your OSS Index Username
+
+Global Flags:
+  -t, --token string      Specify your OSS Index API Token
+  -u, --username string   Specify your OSS Index Username
 ```
 
 #### Exclude vulnerabilities
@@ -224,23 +231,27 @@ Examples:
 
         dpkg-query --show --showformat='${Package} ${Version}\n' | ./ahab iq --application testapp
         yum list installed | ./ahab iq --application testapp
+        dnf list installed | ./ahab iq --application testapp
         apk info -vv | sort | ./ahab iq --application testapp
-
+        
 
 Flags:
-  -v, -- count                              Set log level, higher is more verbose
-      --clean-cache                         Flag to clean the database cache for OSS Index
-  -e, --exclude-vulnerability CveListFlag   Comma separated list of CVEs to exclude (default [])
-  -x, --exclude-vulnerability-file string   Path to a file containing newline separated CVEs to be excluded (default "./.ahab-ignore")
-  -h, --help                                help for chase
-      --loud                                Specify if you want non vulnerable packages included in your output
-      --no-color                            Specify if you want no color in your results
-      --os string                           Specify a value for the operating system type you want to scan (alpine, debian, fedora). Useful if autodetection fails and/or you want to explicitly set it. (DEPRECATED: use package-manager)
-      --output string                       Specify the output type you want (json, text, csv) (default "text")
-      --package-manager string              Specify package manager type you want to scan (apk, dnf, dpkg or yum). Useful if autodetection fails and/or you want to explicitly set it.
-      --quiet                               Quiet removes the header from being printed
-      --token string                        Specify your OSS Index API Token
-      --user string                         Specify your OSS Index Username
+  -v, -- count                   Set log level, higher is more verbose
+      --application string       Specify public application ID for request (required)
+  -h, --help                     help for iq
+      --host string              Specify Nexus IQ Server URL (default "http://localhost:8070")
+      --max-retries int          Specify maximum number of tries to poll Nexus IQ Server (default 300)
+      --os string                Specify a value for the operating system type you want to scan (alpine, debian, fedora). Useful if autodetection fails and/or you want to explicitly set it. (DEPRECATED: use package-manager)
+      --oss-index-token string   Specify your OSS Index API Token
+      --oss-index-user string    Specify your OSS Index Username
+      --package-manager string   Specify package manager type you want to scan (apk, dnf, dpkg or yum). Useful if autodetection fails and/or you want to explicitly set it.
+      --quiet                    Quiet removes the header from being printed
+      --stage string             Specify stage for application (default "develop")
+      --user string              Specify Nexus IQ Username for request (default "admin")
+
+Global Flags:
+  -t, --token string      Specify your OSS Index API Token
+  -u, --username string   Specify your OSS Index Username
 ```
 
 ## Why Ahab?

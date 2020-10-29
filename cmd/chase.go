@@ -19,6 +19,9 @@ package cmd
 import (
 	"bufio"
 	"fmt"
+	"github.com/sonatype-nexus-community/go-sona-types/configuration"
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
 	"os"
 	"regexp"
 	"strings"
@@ -56,6 +59,7 @@ func (cve *CveListFlag) Set(value string) error {
 func (cve *CveListFlag) Type() string { return "CveListFlag" }
 
 var (
+	cfgFile                      string
 	packageManager               string
 	cleanCache                   bool
 	ossIndexUser                 string
@@ -78,8 +82,6 @@ func init() {
 	pf.StringVar(&packageManager, "os", "", "Specify a value for the operating system type you want to scan (alpine, debian, fedora). Useful if autodetection fails and/or you want to explicitly set it.")
 	pf.StringVar(&packageManager, "package-manager", "", "Specify package manager type you want to scan (apk, dnf, dpkg or yum). Useful if autodetection fails and/or you want to explicitly set it.")
 	pf.BoolVar(&cleanCache, "clean-cache", false, "Flag to clean the database cache for OSS Index")
-	pf.StringVar(&ossIndexUser, "user", "", "Specify your OSS Index Username")
-	pf.StringVar(&ossIndexToken, "token", "", "Specify your OSS Index API Token")
 	pf.StringVar(&output, "output", "text", "Specify the output type you want (json, text, csv)")
 	pf.BoolVar(&loud, "loud", false, "Specify if you want non vulnerable packages included in your output")
 	pf.BoolVar(&quiet, "quiet", false, "Quiet removes the header from being printed")
@@ -103,6 +105,7 @@ var chaseCmd = &cobra.Command{
 	`,
 	SilenceErrors: true,
 	SilenceUsage:  true,
+	PreRun:        func(cmd *cobra.Command, args []string) { bindViperRootCmd() },
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		defer func() {
 			if r := recover(); r != nil {
@@ -188,6 +191,32 @@ var chaseCmd = &cobra.Command{
 
 		return
 	},
+}
+
+const (
+	flagNameOssiUsername = "username"
+	flagNameOssiToken    = "token"
+)
+
+func bindViperRootCmd() {
+	// need to defer bind call until command is run. see: https://github.com/spf13/viper/issues/233
+
+	// Bind viper to the flags passed in via the command line, so it will override config from file
+	if err := viper.BindPFlag(configuration.ViperKeyUsername, lookupPersistentFlagNotNil(flagNameOssiUsername, rootCmd)); err != nil {
+		panic(err)
+	}
+	if err := viper.BindPFlag(configuration.ViperKeyToken, lookupPersistentFlagNotNil(flagNameOssiToken, rootCmd)); err != nil {
+		panic(err)
+	}
+}
+
+func lookupPersistentFlagNotNil(flagName string, cmd *cobra.Command) *pflag.Flag {
+	// see: https://github.com/spf13/viper/pull/949
+	foundFlag := cmd.PersistentFlags().Lookup(flagName)
+	if foundFlag == nil {
+		panic(fmt.Errorf("persisent flag lookup for name: '%s' returned nil", flagName))
+	}
+	return foundFlag
 }
 
 func getLogger(level int) (*logrus.Logger, error) {

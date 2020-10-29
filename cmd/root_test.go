@@ -123,7 +123,7 @@ func setupTestOSSIConfigFileValues(t *testing.T, tempDir string) {
 	assert.Nil(t, ioutil.WriteFile(cfgFile, []byte(credentials), 0644))
 }
 
-func createFakeStdIn(t *testing.T) (oldStdIn *os.File, tmpFile *os.File) {
+/*func createFakeStdIn(t *testing.T) (oldStdIn *os.File, tmpFile *os.File) {
 	return createFakeStdInWithString(t, "Testing")
 }
 func createFakeStdInWithString(t *testing.T, inputString string) (oldStdIn *os.File, tmpFile *os.File) {
@@ -146,3 +146,4 @@ func createFakeStdInWithString(t *testing.T, inputString string) (oldStdIn *os.F
 	os.Stdin = tmpFile
 	return oldStdIn, tmpFile
 }
+*/

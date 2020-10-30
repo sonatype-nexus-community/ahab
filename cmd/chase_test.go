@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"github.com/sonatype-nexus-community/go-sona-types/ossindex/types"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -92,7 +93,6 @@ func TestChaseCommandEmptyUserAndToken(t *testing.T) {
 		_, _ = w.Write(jsonCoordinates)
 	}))
 	defer ts.Close()
-
 	origOssIndexURL := ossIndexURL
 	ossIndexURL = ts.URL
 	defer func() {
@@ -106,7 +106,7 @@ func TestChaseCommandEmptyUserAndToken(t *testing.T) {
 
 var expectedCoordinate types.Coordinate
 
-/*func TestChaseCommandViperUserAndToken(t *testing.T) {
+func TestChaseCommandViperUserAndToken(t *testing.T) {
 	oldStdIn, tmpFile := createFakeStdInWithString(t, "alpine-baselayout-3.1.2-r0 - Alpine base dir structure and init scripts")
 	defer func() {
 		os.Stdin = oldStdIn
@@ -126,7 +126,6 @@ var expectedCoordinate types.Coordinate
 		_, _ = w.Write(jsonCoordinates)
 	}))
 	defer ts.Close()
-
 	origOssIndexURL := ossIndexURL
 	ossIndexURL = ts.URL
 	defer func() {
@@ -144,10 +143,7 @@ var expectedCoordinate types.Coordinate
 		resetOSSIConfigFile()
 	}()
 
-	fmt.Printf("******** configfile: %s\n", cfgFile)
-	fmt.Printf("******** ossi: %+v\n", ossi)
 	// pass a specific package manager to avoid test behavior changes on different OSs.
 	_, err := executeCommand(rootCmd, chaseCmd.Use, "--os", "apk")
 	assert.Nil(t, err)
 }
-*/

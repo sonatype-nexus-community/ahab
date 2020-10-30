@@ -22,7 +22,6 @@ import (
 	"github.com/sonatype-nexus-community/go-sona-types/configuration"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
@@ -130,16 +129,6 @@ var chaseCmd = &cobra.Command{
 			panic(err)
 		}
 
-		fmt.Printf("***** args: %s\n", args)
-		fmt.Printf("***** cfgFile: %s\n", cfgFile)
-		if cfgFile != "" {
-			content, _ := ioutil.ReadFile(cfgFile)
-			fmt.Printf("***** content: \n%s\n", content)
-		}
-		fmt.Printf("***** user: %s\n", viper.GetString(configuration.ViperKeyUsername))
-		fmt.Printf("***** token: %s\n", viper.GetString(configuration.ViperKeyToken))
-		fmt.Printf("***** ossIndexUser: %s\n", ossIndexUser)
-		fmt.Printf("***** ossIndexURL: %s\n", ossIndexURL)
 		ossi = ossindex.New(logLady,
 			types.Options{
 				DBCacheName: "ahab-cache",

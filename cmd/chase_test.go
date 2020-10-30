@@ -3,7 +3,6 @@ package cmd
 import (
 	"encoding/json"
 	"github.com/sonatype-nexus-community/go-sona-types/ossindex/types"
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -106,7 +105,7 @@ func TestChaseCommandEmptyUserAndToken(t *testing.T) {
 
 var expectedCoordinate types.Coordinate
 
-func TestChaseCommandViperUserAndToken(t *testing.T) {
+/*func TestChaseCommandViperUserAndToken(t *testing.T) {
 	oldStdIn, tmpFile := createFakeStdInWithString(t, "alpine-baselayout-3.1.2-r0 - Alpine base dir structure and init scripts")
 	defer func() {
 		os.Stdin = oldStdIn
@@ -147,3 +146,4 @@ func TestChaseCommandViperUserAndToken(t *testing.T) {
 	_, err := executeCommand(rootCmd, chaseCmd.Use, "--os", "apk")
 	assert.Nil(t, err)
 }
+*/

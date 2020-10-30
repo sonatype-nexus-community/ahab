@@ -22,6 +22,7 @@ import (
 	"github.com/sonatype-nexus-community/go-sona-types/configuration"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
@@ -62,6 +63,7 @@ var (
 	cfgFile                      string
 	packageManager               string
 	cleanCache                   bool
+	ossIndexURL                  string
 	ossIndexUser                 string
 	ossIndexToken                string
 	output                       string
@@ -128,14 +130,25 @@ var chaseCmd = &cobra.Command{
 			panic(err)
 		}
 
+		fmt.Printf("***** args: %s\n", args)
+		fmt.Printf("***** cfgFile: %s\n", cfgFile)
+		if cfgFile != "" {
+			content, _ := ioutil.ReadFile(cfgFile)
+			fmt.Printf("***** content: \n%s\n", content)
+		}
+		fmt.Printf("***** user: %s\n", viper.GetString(configuration.ViperKeyUsername))
+		fmt.Printf("***** token: %s\n", viper.GetString(configuration.ViperKeyToken))
+		fmt.Printf("***** ossIndexUser: %s\n", ossIndexUser)
+		fmt.Printf("***** ossIndexURL: %s\n", ossIndexURL)
 		ossi = ossindex.New(logLady,
 			types.Options{
 				DBCacheName: "ahab-cache",
 				TTL:         time.Now().Local().Add(time.Hour * 12),
 				Tool:        "ahab-client",
 				Version:     buildversion.BuildVersion,
-				Username:    ossIndexUser,
-				Token:       ossIndexToken,
+				OSSIndexURL: ossIndexURL,
+				Username:    viper.GetString(configuration.ViperKeyUsername),
+				Token:       viper.GetString(configuration.ViperKeyToken),
 			})
 
 		if cleanCache {
@@ -275,13 +288,20 @@ func parseStdInList(list []string, packageManager *string) (packages.IPackage, e
 
 const MsgMissingStdIn = "Nothing passed in to standard in"
 
-func parseStdIn(packageManager *string) (packages.IPackage, error) {
-	fi, err := os.Stdin.Stat()
-	if err != nil {
-		return nil, err
+func checkStdIn() (err error) {
+	stat, _ := os.Stdin.Stat()
+	if (stat.Mode() & os.ModeCharDevice) == 0 {
+		logLady.Info("StdIn is valid")
+	} else {
+		err = fmt.Errorf(MsgMissingStdIn)
+		logLady.Error(err)
 	}
-	if (fi.Mode() & os.ModeNamedPipe) == 0 {
-		return nil, fmt.Errorf(MsgMissingStdIn)
+	return
+}
+
+func parseStdIn(packageManager *string) (packages.IPackage, error) {
+	if err := checkStdIn(); err != nil {
+		return nil, err
 	}
 
 	var list []string

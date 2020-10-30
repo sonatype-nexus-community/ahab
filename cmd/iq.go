@@ -18,6 +18,8 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/sonatype-nexus-community/go-sona-types/configuration"
+	"github.com/spf13/viper"
 	"os"
 
 	"github.com/sonatype-nexus-community/ahab/buildversion"
@@ -108,8 +110,8 @@ var iqCmd = &cobra.Command{
 				Stage:         stage,
 				Tool:          "ahab-client",
 				Version:       buildversion.BuildVersion,
-				OSSIndexToken: ossIndexToken,
-				OSSIndexUser:  ossIndexUser,
+				OSSIndexToken: viper.GetString(configuration.ViperKeyToken),
+				OSSIndexUser:  viper.GetString(configuration.ViperKeyUsername),
 				DBCacheName:   "ahab-cache",
 				MaxRetries:    maxRetries,
 			})

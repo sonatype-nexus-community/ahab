@@ -273,13 +273,15 @@ func parseStdInList(list []string, packageManager *string) (packages.IPackage, e
 	}
 }
 
+const MsgMissingStdIn = "Nothing passed in to standard in"
+
 func parseStdIn(packageManager *string) (packages.IPackage, error) {
 	fi, err := os.Stdin.Stat()
 	if err != nil {
 		return nil, err
 	}
 	if (fi.Mode() & os.ModeNamedPipe) == 0 {
-		return nil, fmt.Errorf("Nothing passed in to standard in")
+		return nil, fmt.Errorf(MsgMissingStdIn)
 	}
 
 	var list []string

@@ -1,13 +1,13 @@
 package cmd
 
 import (
-	"github.com/sonatype-nexus-community/ahab/packages"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestChaseCommandNoArgs(t *testing.T) {
-	_, err := executeCommand(rootCmd, chaseCmd.Use)
+	// pass a specific package manager to avoid test behavior changes on different OSs.
+	_, err := executeCommand(rootCmd, chaseCmd.Use, "--os", "apk")
 	assert.NotNil(t, err)
-	assert.Equal(t, packages.SupportedPackageManagers, err.Error())
+	assert.Equal(t, MsgMissingStdIn, err.Error())
 }

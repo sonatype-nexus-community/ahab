@@ -128,19 +128,9 @@ Use "ahab [command] --help" for more information about a command.
 #### OSS Index usage
 
 ```
-$ ahab chase
- ______      __                    __
-/\  _  \    /\ \                  /\ \
-\ \ \L\ \   \ \ \___       __     \ \ \____
- \ \  __ \   \ \  _ `\   /'__`\    \ \ '__`\
-  \ \ \/\ \   \ \ \ \ \ /\ \L\.\_   \ \ \L\ \
-   \ \_\ \_\   \ \_\ \_\\ \__/.\_\   \ \_,__/
-    \/_/\/_/    \/_/\/_/ \/__/\/_/    \/___/
-  _        _                           _    _
- /_)      /_` _  _  _ _/_     _  _    (/   /_` _ . _  _   _/  _
-/_) /_/  ._/ /_// //_|/  /_/ /_//_'  (_X  /   / / /_'/ //_/ _\
-    _/                   _/ /
-Ahab version: development
+$ ahab chase -h
+chase is used for auditing projects with OSS Index
+
 Usage:
   ahab chase [flags]
 
@@ -163,7 +153,7 @@ Flags:
       --os string                           Specify a value for the operating system type you want to scan (alpine, debian, fedora). Useful if autodetection fails and/or you want to explicitly set it. (DEPRECATED: use package-manager)
       --output string                       Specify the output type you want (json, text, csv) (default "text")
       --package-manager string              Specify package manager type you want to scan (apk, dnf, dpkg or yum). Useful if autodetection fails and/or you want to explicitly set it.
-      --quiet                               Quiet removes the header from being printed
+      --quiet                               Quiet removes the header from being printed (default true)
 
 Global Flags:
   -t, --token string      Specify your OSS Index API Token
@@ -211,43 +201,32 @@ CVN-543 until=2018-02-12 #Waiting on release from third party. Should be out bef
 #### Nexus IQ Server Usage
 
 ```
-$ ahab iq
- ______      __                    __
-/\  _  \    /\ \                  /\ \
-\ \ \L\ \   \ \ \___       __     \ \ \____
- \ \  __ \   \ \  _ `\   /'__`\    \ \ '__`\
-  \ \ \/\ \   \ \ \ \ \ /\ \L\.\_   \ \ \L\ \
-   \ \_\ \_\   \ \_\ \_\\ \__/.\_\   \ \_,__/
-    \/_/\/_/    \/_/\/_/ \/__/\/_/    \/___/
-  _        _                           _    _
- /_)      /_` _  _  _ _/_     _  _    (/   /_` _ . _  _   _/  _
-/_) /_/  ._/ /_// //_|/  /_/ /_//_'  (_X  /   / / /_'/ //_/ _\
-    _/                   _/ /
-Ahab version: development
+$ ahab iq -h
+iq is used for auditing your projects with Nexus IQ Server
+
 Usage:
   ahab iq [flags]
 
 Examples:
 
-        dpkg-query --show --showformat='${Package} ${Version}\n' | ./ahab iq --application testapp
-        yum list installed | ./ahab iq --application testapp
-        dnf list installed | ./ahab iq --application testapp
-        apk info -vv | sort | ./ahab iq --application testapp
+        dpkg-query --show --showformat='${Package} ${Version}\n' | ./ahab iq --iq-application testapp
+        yum list installed | ./ahab iq --iq-application testapp
+        dnf list installed | ./ahab iq --iq-application testapp
+        apk info -vv | sort | ./ahab iq --iq-application testapp
         
 
 Flags:
   -v, -- count                   Set log level, higher is more verbose
-      --application string       Specify public application ID for request (required)
   -h, --help                     help for iq
-      --host string              Specify Nexus IQ Server URL (default "http://localhost:8070")
+  -a, --iq-application string    Specify public application ID for request (required)
+  -x, --iq-server-url string     Specify Nexus IQ Server URL (default "http://localhost:8070")
+  -s, --iq-stage string          Specify stage for application (default "develop")
+  -k, --iq-token string          Specify Nexus IQ Token/Password for request (default "admin123")
+  -l, --iq-username string       Specify Nexus IQ Username for request (default "admin")
       --max-retries int          Specify maximum number of tries to poll Nexus IQ Server (default 300)
       --os string                Specify a value for the operating system type you want to scan (alpine, debian, fedora). Useful if autodetection fails and/or you want to explicitly set it. (DEPRECATED: use package-manager)
-      --oss-index-token string   Specify your OSS Index API Token
-      --oss-index-user string    Specify your OSS Index Username
       --package-manager string   Specify package manager type you want to scan (apk, dnf, dpkg or yum). Useful if autodetection fails and/or you want to explicitly set it.
-      --quiet                    Quiet removes the header from being printed
-      --stage string             Specify stage for application (default "develop")
-      --user string              Specify Nexus IQ Username for request (default "admin")
+      --quiet                    Quiet removes the header from being printed (default true)
 
 Global Flags:
   -t, --token string      Specify your OSS Index API Token

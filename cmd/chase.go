@@ -140,6 +140,16 @@ var chaseCmd = &cobra.Command{
 				Token:       viper.GetString(configuration.ViperKeyToken),
 			})
 
+		logLady.WithField("ossiServer", types.Options{
+			OSSIndexURL: ossi.Options.OSSIndexURL,
+			Username:    cleanUserName(ossi.Options.Username),
+			Token:       "***hidden***",
+			Tool:        ossi.Options.Tool,
+			Version:     ossi.Options.Version,
+			DBCacheName: ossi.Options.DBCacheName,
+			TTL:         ossi.Options.TTL,
+		}).Debug("Created ossiIndex server")
+
 		if cleanCache {
 			err = ossi.NoCacheNoProblems()
 			if err != nil {

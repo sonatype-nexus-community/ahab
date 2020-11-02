@@ -105,6 +105,8 @@ func TestChaseCommandEmptyUserAndToken(t *testing.T) {
 
 var expectedCoordinate types.Coordinate
 
+// TODO: Figure out why this test works when run by itself, but fails as part of test suite.
+// Manual testing confirms correct behavior
 /*func TestChaseCommandViperUserAndToken(t *testing.T) {
 	oldStdIn, tmpFile := createFakeStdInWithString(t, "alpine-baselayout-3.1.2-r0 - Alpine base dir structure and init scripts")
 	defer func() {
@@ -117,6 +119,8 @@ var expectedCoordinate types.Coordinate
 		assert.Equal(t, http.MethodPost, r.Method)
 		assert.Equal(t, "/", r.URL.EscapedPath())
 
+		assert.Equal(t, "ossiUsernameValue", ossi.Options.Username)
+		assert.Equal(t, "ossiTokenValue", ossi.Options.Token)
 		assert.Equal(t, "Basic b3NzaVVzZXJuYW1lVmFsdWU6b3NzaVRva2VuVmFsdWU=", r.Header.Get("Authorization"), r)
 
 		w.WriteHeader(http.StatusOK)

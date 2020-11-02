@@ -93,3 +93,14 @@ func fileExists(filename string) bool {
 	}
 	return !info.IsDir()
 }
+
+func cleanUserName(origUsername string) string {
+	runes := []rune(origUsername)
+	cleanUsername := "***hidden***"
+	if len(runes) > 0 {
+		first := string(runes[0])
+		last := string(runes[len(runes)-1])
+		cleanUsername = first + "***hidden***" + last
+	}
+	return cleanUsername
+}

@@ -31,6 +31,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/sonatype-nexus-community/ahab/audit"
 	"github.com/sonatype-nexus-community/ahab/buildversion"
+	"github.com/sonatype-nexus-community/ahab/internal/customerrors"
 	"github.com/sonatype-nexus-community/ahab/logger"
 	"github.com/sonatype-nexus-community/ahab/packages"
 	"github.com/sonatype-nexus-community/ahab/parse"
@@ -85,7 +86,7 @@ func init() {
 	pf.BoolVar(&cleanCache, "clean-cache", false, "Flag to clean the database cache for OSS Index")
 	pf.StringVar(&output, "output", "text", "Specify the output type you want (json, text, csv)")
 	pf.BoolVar(&loud, "loud", false, "Specify if you want non vulnerable packages included in your output")
-	pf.BoolVar(&quiet, "quiet", false, "Quiet removes the header from being printed")
+	pf.BoolVar(&quiet, "quiet", true, "Quiet removes the header from being printed")
 	pf.BoolVar(&noColor, "no-color", false, "Specify if you want no color in your results")
 	pf.CountVarP(&verbose, "", "v", "Set log level, higher is more verbose")
 
@@ -104,9 +105,7 @@ var chaseCmd = &cobra.Command{
 	dnf list installed | ./ahab chase
 	apk info -vv | sort | ./ahab chase
 	`,
-	SilenceErrors: true,
-	SilenceUsage:  true,
-	PreRun:        func(cmd *cobra.Command, args []string) { bindViperRootCmd() },
+	PreRun: func(cmd *cobra.Command, args []string) { bindViperRootCmd() },
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		defer func() {
 			if r := recover(); r != nil {
@@ -115,8 +114,7 @@ var chaseCmd = &cobra.Command{
 				if !ok {
 					err = fmt.Errorf("pkg: %v", r)
 				}
-				_ = cmd.Usage()
-				logger.PrintErrorAndLogLocation(err)
+				err = customerrors.ErrorShowLogPath{Err: err}
 			}
 		}()
 
@@ -285,7 +283,7 @@ func parseStdInList(list []string, packageManager *string) (packages.IPackage, e
 	}
 }
 
-const MsgMissingStdIn = "Nothing passed in to standard in"
+const MsgMissingStdIn = "nothing passed in to standard in"
 
 func checkStdIn() (err error) {
 	stat, _ := os.Stdin.Stat()

@@ -14,7 +14,7 @@ func TestChaseCommandNoArgs(t *testing.T) {
 	// pass a specific package manager to avoid test behavior changes on different OSs.
 	_, err := executeCommand(rootCmd, chaseCmd.Use, "--os", "apk")
 	assert.NotNil(t, err)
-	assert.Equal(t, MsgMissingStdIn, err.Error())
+	assert.Contains(t, err.Error(), MsgMissingStdIn)
 }
 
 func TestChaseCommandApkInvalidStdInText(t *testing.T) {
@@ -40,11 +40,12 @@ func TestChaseCommandApkInvalidStdInText(t *testing.T) {
 
 	_, err := executeCommand(rootCmd, chaseCmd.Use, "--os", "apk")
 	assert.NotNil(t, err)
-	assert.Equal(t, "An error occurred: [400 Bad Request] error accessing OSS Index", err.Error())
+	assert.Contains(t, err.Error(), "An error occurred: [400 Bad Request] error accessing OSS Index")
 }
 
 func TestChaseCommandBadUserAndToken(t *testing.T) {
-	oldStdIn, tmpFile := createFakeStdInWithString(t, "alpine-baselayout-3.1.2-r0 - Alpine base dir structure and init scripts")
+	// FAKE alpine package should avoid test failure due to cached package
+	oldStdIn, tmpFile := createFakeStdInWithString(t, "FAKEalpine-baselayout-3.1.2-r0 - Alpine base dir structure and init scripts")
 	defer func() {
 		os.Stdin = oldStdIn
 		_ = tmpFile.Close()
@@ -68,8 +69,8 @@ func TestChaseCommandBadUserAndToken(t *testing.T) {
 
 	// pass a specific package manager to avoid test behavior changes on different OSs.
 	_, err := executeCommand(rootCmd, chaseCmd.Use, "-u", "baduser", "-t", "badtoken", "--os", "apk")
-	assert.NotNil(t, err)
-	assert.Equal(t, "An error occurred: [401 Unauthorized] error accessing OSS Index", err.Error())
+	assert.NotNil(t, err) // if this fails, make sure the cache is cleaned first
+	assert.Contains(t, err.Error(), "An error occurred: [401 Unauthorized] error accessing OSS Index")
 }
 
 func TestChaseCommandEmptyUserAndToken(t *testing.T) {

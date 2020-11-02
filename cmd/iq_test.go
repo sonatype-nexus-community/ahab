@@ -33,7 +33,7 @@ func TestIqApplicationFlagMissing(t *testing.T) {
 	//output, err := executeCommand(rootCmd, iqCmd.Use)
 	//assert.Contains(t, output, "Error: \""+flagNameIqApplication+"\" not set, see usage for more information")
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "\""+flagNameIqApplication+"\" not set, see usage for more information")
+	assert.Contains(t, err.Error(), "required flag(s) \""+flagNameIqApplication+"\" not set")
 }
 
 func TestIqHelp(t *testing.T) {

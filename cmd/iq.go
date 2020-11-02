@@ -64,6 +64,9 @@ func init() {
 	pf.BoolVar(&quiet, "quiet", true, "Quiet removes the header from being printed")
 
 	pf.StringVarP(&application, flagNameIqApplication, "a", "", "Specify public application ID for request (required)")
+	if err := iqCmd.MarkPersistentFlagRequired(flagNameIqApplication); err != nil {
+		panic(err)
+	}
 
 	pf.StringVarP(&stage, flagNameIqStage, "s", "develop", "Specify stage for application")
 	pf.IntVar(&maxRetries, "max-retries", 300, "Specify maximum number of tries to poll Nexus IQ Server")
@@ -101,13 +104,6 @@ var iqCmd = &cobra.Command{
 		}
 
 		logLady, err = getLogger(verbose)
-		if err != nil {
-			panic(err)
-		}
-
-		fflags := cmd.Flags()
-
-		err = checkRequiredFlags(fflags)
 		if err != nil {
 			panic(err)
 		}
@@ -187,13 +183,6 @@ var iqCmd = &cobra.Command{
 		fmt.Println("Report URL: ", res.ReportHTMLURL)
 		return
 	},
-}
-
-func checkRequiredFlags(flags *pflag.FlagSet) error {
-	if !flags.Changed(flagNameIqApplication) {
-		return fmt.Errorf("\"%s\" not set, see usage for more information", flagNameIqApplication)
-	}
-	return nil
 }
 
 func bindViperIq(cmd *cobra.Command) {

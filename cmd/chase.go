@@ -19,6 +19,9 @@ package cmd
 import (
 	"bufio"
 	"fmt"
+	"github.com/sonatype-nexus-community/go-sona-types/configuration"
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
 	"os"
 	"regexp"
 	"strings"
@@ -28,6 +31,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/sonatype-nexus-community/ahab/audit"
 	"github.com/sonatype-nexus-community/ahab/buildversion"
+	"github.com/sonatype-nexus-community/ahab/internal/customerrors"
 	"github.com/sonatype-nexus-community/ahab/logger"
 	"github.com/sonatype-nexus-community/ahab/packages"
 	"github.com/sonatype-nexus-community/ahab/parse"
@@ -56,8 +60,10 @@ func (cve *CveListFlag) Set(value string) error {
 func (cve *CveListFlag) Type() string { return "CveListFlag" }
 
 var (
+	cfgFile                      string
 	packageManager               string
 	cleanCache                   bool
+	ossIndexURL                  string
 	ossIndexUser                 string
 	ossIndexToken                string
 	output                       string
@@ -78,11 +84,9 @@ func init() {
 	pf.StringVar(&packageManager, "os", "", "Specify a value for the operating system type you want to scan (alpine, debian, fedora). Useful if autodetection fails and/or you want to explicitly set it.")
 	pf.StringVar(&packageManager, "package-manager", "", "Specify package manager type you want to scan (apk, dnf, dpkg or yum). Useful if autodetection fails and/or you want to explicitly set it.")
 	pf.BoolVar(&cleanCache, "clean-cache", false, "Flag to clean the database cache for OSS Index")
-	pf.StringVar(&ossIndexUser, "user", "", "Specify your OSS Index Username")
-	pf.StringVar(&ossIndexToken, "token", "", "Specify your OSS Index API Token")
 	pf.StringVar(&output, "output", "text", "Specify the output type you want (json, text, csv)")
 	pf.BoolVar(&loud, "loud", false, "Specify if you want non vulnerable packages included in your output")
-	pf.BoolVar(&quiet, "quiet", false, "Quiet removes the header from being printed")
+	pf.BoolVar(&quiet, "quiet", true, "Quiet removes the header from being printed")
 	pf.BoolVar(&noColor, "no-color", false, "Specify if you want no color in your results")
 	pf.CountVarP(&verbose, "", "v", "Set log level, higher is more verbose")
 
@@ -101,8 +105,7 @@ var chaseCmd = &cobra.Command{
 	dnf list installed | ./ahab chase
 	apk info -vv | sort | ./ahab chase
 	`,
-	SilenceErrors: true,
-	SilenceUsage:  true,
+	PreRun: func(cmd *cobra.Command, args []string) { bindViperRootCmd() },
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		defer func() {
 			if r := recover(); r != nil {
@@ -111,8 +114,7 @@ var chaseCmd = &cobra.Command{
 				if !ok {
 					err = fmt.Errorf("pkg: %v", r)
 				}
-				_ = cmd.Usage()
-				logger.PrintErrorAndLogLocation(err)
+				err = customerrors.ErrorShowLogPath{Err: err}
 			}
 		}()
 
@@ -131,9 +133,20 @@ var chaseCmd = &cobra.Command{
 				TTL:         time.Now().Local().Add(time.Hour * 12),
 				Tool:        "ahab-client",
 				Version:     buildversion.BuildVersion,
-				Username:    ossIndexUser,
-				Token:       ossIndexToken,
+				OSSIndexURL: ossIndexURL,
+				Username:    viper.GetString(configuration.ViperKeyUsername),
+				Token:       viper.GetString(configuration.ViperKeyToken),
 			})
+
+		logLady.WithField("ossiServer", types.Options{
+			OSSIndexURL: ossi.Options.OSSIndexURL,
+			Username:    cleanUserName(ossi.Options.Username),
+			Token:       "***hidden***",
+			Tool:        ossi.Options.Tool,
+			Version:     ossi.Options.Version,
+			DBCacheName: ossi.Options.DBCacheName,
+			TTL:         ossi.Options.TTL,
+		}).Debug("Created ossiIndex server")
 
 		if cleanCache {
 			err = ossi.NoCacheNoProblems()
@@ -190,6 +203,32 @@ var chaseCmd = &cobra.Command{
 	},
 }
 
+const (
+	flagNameOssiUsername = "username"
+	flagNameOssiToken    = "token"
+)
+
+func bindViperRootCmd() {
+	// need to defer bind call until command is run. see: https://github.com/spf13/viper/issues/233
+
+	// Bind viper to the flags passed in via the command line, so it will override config from file
+	if err := viper.BindPFlag(configuration.ViperKeyUsername, lookupPersistentFlagNotNil(flagNameOssiUsername, rootCmd)); err != nil {
+		panic(err)
+	}
+	if err := viper.BindPFlag(configuration.ViperKeyToken, lookupPersistentFlagNotNil(flagNameOssiToken, rootCmd)); err != nil {
+		panic(err)
+	}
+}
+
+func lookupPersistentFlagNotNil(flagName string, cmd *cobra.Command) *pflag.Flag {
+	// see: https://github.com/spf13/viper/pull/949
+	foundFlag := cmd.PersistentFlags().Lookup(flagName)
+	if foundFlag == nil {
+		panic(fmt.Errorf("persisent flag lookup for name: '%s' returned nil", flagName))
+	}
+	return foundFlag
+}
+
 func getLogger(level int) (*logrus.Logger, error) {
 	switch level {
 	case 1:
@@ -244,13 +283,22 @@ func parseStdInList(list []string, packageManager *string) (packages.IPackage, e
 	}
 }
 
-func parseStdIn(packageManager *string) (packages.IPackage, error) {
-	fi, err := os.Stdin.Stat()
-	if err != nil {
-		return nil, err
+const MsgMissingStdIn = "nothing passed in to standard in"
+
+func checkStdIn() (err error) {
+	stat, _ := os.Stdin.Stat()
+	if (stat.Mode() & os.ModeCharDevice) == 0 {
+		logLady.Info("StdIn is valid")
+	} else {
+		err = fmt.Errorf(MsgMissingStdIn)
+		logLady.Error(err)
 	}
-	if (fi.Mode() & os.ModeNamedPipe) == 0 {
-		return nil, fmt.Errorf("Nothing passed in to standard in")
+	return
+}
+
+func parseStdIn(packageManager *string) (packages.IPackage, error) {
+	if err := checkStdIn(); err != nil {
+		return nil, err
 	}
 
 	var list []string

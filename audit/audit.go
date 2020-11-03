@@ -158,6 +158,7 @@ func outputText(noColor bool, loud bool, projects []types.Coordinate) (int, stri
 	t.AppendSeparator()
 	t.AppendRow([]interface{}{"Vulnerable Dependencies", au.Bold(au.Red(strconv.Itoa(len(vulnerablePackages))))})
 	sb.WriteString(t.Render())
+	sb.WriteString("\n")
 
 	return len(vulnerablePackages), sb.String(), nil
 }

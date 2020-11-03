@@ -18,10 +18,15 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/mitchellh/go-homedir"
+	"github.com/sonatype-nexus-community/ahab/internal/customerrors"
+	"github.com/sonatype-nexus-community/go-sona-types/configuration"
+	"github.com/sonatype-nexus-community/go-sona-types/ossindex/types"
+	"github.com/spf13/viper"
 	"os"
+	"path"
 
 	"github.com/sonatype-nexus-community/ahab/buildversion"
-	"github.com/sonatype-nexus-community/ahab/logger"
 	"github.com/sonatype-nexus-community/ahab/packages"
 	"github.com/sonatype-nexus-community/go-sona-types/iq"
 	"github.com/spf13/cobra"
@@ -29,6 +34,7 @@ import (
 )
 
 var (
+	cfgFileIQ   string
 	iqUsername  string
 	iqToken     string
 	iqHost      string
@@ -38,37 +44,49 @@ var (
 	lifecycle   *iq.Server
 )
 
+const (
+	flagNameIqUsername    = "iq-username"
+	flagNameIqToken       = "iq-token"
+	flagNameIqStage       = "iq-stage"
+	flagNameIqApplication = "iq-application"
+	flagNameIqServerUrl   = "iq-server-url"
+)
+
 func init() {
-	rootCmd.AddCommand(iqCmd)
+	cobra.OnInitialize(initIQConfig)
 
 	pf := iqCmd.PersistentFlags()
 	pf.StringVar(&packageManager, "os", "", "Specify a value for the operating system type you want to scan (alpine, debian, fedora). Useful if autodetection fails and/or you want to explicitly set it.")
 	pf.StringVar(&packageManager, "package-manager", "", "Specify package manager type you want to scan (apk, dnf, dpkg or yum). Useful if autodetection fails and/or you want to explicitly set it.")
-	pf.StringVar(&iqUsername, "user", "admin", "Specify Nexus IQ Username for request")
-	pf.StringVar(&iqToken, "token", "admin123", "Specify Nexus IQ Token/Password for request")
-	pf.StringVar(&ossIndexUser, "oss-index-user", "", "Specify your OSS Index Username")
-	pf.StringVar(&ossIndexToken, "oss-index-token", "", "Specify your OSS Index API Token")
-	pf.StringVar(&iqHost, "host", "http://localhost:8070", "Specify Nexus IQ Server URL")
-	pf.BoolVar(&quiet, "quiet", false, "Quiet removes the header from being printed")
-	pf.StringVar(&application, "application", "", "Specify public application ID for request (required)")
-	pf.StringVar(&stage, "stage", "develop", "Specify stage for application")
+	pf.StringVarP(&iqUsername, flagNameIqUsername, "l", "admin", "Specify Nexus IQ Username for request")
+	pf.StringVarP(&iqToken, flagNameIqToken, "k", "admin123", "Specify Nexus IQ Token/Password for request")
+	pf.StringVarP(&iqHost, flagNameIqServerUrl, "x", "http://localhost:8070", "Specify Nexus IQ Server URL")
+	pf.BoolVar(&quiet, "quiet", true, "Quiet removes the header from being printed")
+
+	pf.StringVarP(&application, flagNameIqApplication, "a", "", "Specify public application ID for request (required)")
+	if err := iqCmd.MarkPersistentFlagRequired(flagNameIqApplication); err != nil {
+		panic(err)
+	}
+
+	pf.StringVarP(&stage, flagNameIqStage, "s", "develop", "Specify stage for application")
 	pf.IntVar(&maxRetries, "max-retries", 300, "Specify maximum number of tries to poll Nexus IQ Server")
 	pf.CountVarP(&verbose, "", "v", "Set log level, higher is more verbose")
 
 	iqCmd.Flag("os").Deprecated = "use package-manager"
+
+	rootCmd.AddCommand(iqCmd)
 }
 
 var iqCmd = &cobra.Command{
 	Use:   "iq",
 	Short: "iq is used for auditing your projects with Nexus IQ Server",
 	Example: `
-	dpkg-query --show --showformat='${Package} ${Version}\n' | ./ahab iq --application testapp
-	yum list installed | ./ahab iq --application testapp
-	dnf list installed | ./ahab iq --application testapp
-	apk info -vv | sort | ./ahab iq	--application testapp
+	dpkg-query --show --showformat='${Package} ${Version}\n' | ./ahab iq --` + flagNameIqApplication + ` testapp
+	yum list installed | ./ahab iq --` + flagNameIqApplication + ` testapp
+	dnf list installed | ./ahab iq --` + flagNameIqApplication + ` testapp
+	apk info -vv | sort | ./ahab iq	--` + flagNameIqApplication + ` testapp
 	`,
-	SilenceErrors: true,
-	SilenceUsage:  true,
+	PreRun: func(cmd *cobra.Command, args []string) { bindViperIq(cmd) },
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		defer func() {
 			if r := recover(); r != nil {
@@ -77,8 +95,7 @@ var iqCmd = &cobra.Command{
 				if !ok {
 					err = fmt.Errorf("pkg: %v", r)
 				}
-				_ = cmd.Usage()
-				logger.PrintErrorAndLogLocation(err)
+				err = customerrors.ErrorShowLogPath{Err: err}
 			}
 		}()
 
@@ -91,32 +108,37 @@ var iqCmd = &cobra.Command{
 			panic(err)
 		}
 
-		fflags := cmd.Flags()
-
-		err = checkRequiredFlags(fflags)
-		if err != nil {
-			logLady.Error(err)
-			panic(err)
-		}
-
 		lifecycle, err = iq.New(logLady,
 			iq.Options{
-				User:          iqUsername,
-				Token:         iqToken,
-				Server:        iqHost,
+				User:          viper.GetString(configuration.ViperKeyIQUsername),
+				Token:         viper.GetString(configuration.ViperKeyIQToken),
+				Server:        viper.GetString(configuration.ViperKeyIQServer),
 				Application:   application,
 				Stage:         stage,
 				Tool:          "ahab-client",
 				Version:       buildversion.BuildVersion,
-				OSSIndexToken: ossIndexToken,
-				OSSIndexUser:  ossIndexUser,
+				OSSIndexToken: viper.GetString(configuration.ViperKeyToken),
+				OSSIndexUser:  viper.GetString(configuration.ViperKeyUsername),
 				DBCacheName:   "ahab-cache",
 				MaxRetries:    maxRetries,
 			})
 		if err != nil {
-			logLady.Error(err)
 			panic(err)
 		}
+
+		logLady.WithField("lifecycle", iq.Options{
+			User:          cleanUserName(lifecycle.Options.User),
+			Token:         "***hidden***",
+			Server:        lifecycle.Options.Server,
+			Application:   lifecycle.Options.Application,
+			Stage:         lifecycle.Options.Stage,
+			Tool:          lifecycle.Options.Tool,
+			Version:       lifecycle.Options.Version,
+			OSSIndexUser:  cleanUserName(lifecycle.Options.OSSIndexUser),
+			OSSIndexToken: "***hidden***",
+			DBCacheName:   lifecycle.Options.DBCacheName,
+			MaxRetries:    lifecycle.Options.MaxRetries,
+		}).Debug("Created iq server")
 
 		if packageManager == "" {
 			logLady.Trace("Attempting to detect package manager for you")
@@ -163,9 +185,58 @@ var iqCmd = &cobra.Command{
 	},
 }
 
-func checkRequiredFlags(flags *pflag.FlagSet) error {
-	if !flags.Changed("application") {
-		return fmt.Errorf("Application not set, see usage for more information")
+func bindViperIq(cmd *cobra.Command) {
+	// need to defer bind call until command is run. see: https://github.com/spf13/viper/issues/233
+
+	// need to ensure ossi CLI flags will override ossi config file values when running IQ command
+	bindViperRootCmd()
+
+	// Bind viper to the flags passed in via the command line, so it will override config from file
+	if err := viper.BindPFlag(configuration.ViperKeyIQUsername, lookupFlagNotNil(flagNameIqUsername, cmd)); err != nil {
+		panic(err)
 	}
-	return nil
+	if err := viper.BindPFlag(configuration.ViperKeyIQToken, lookupFlagNotNil(flagNameIqToken, cmd)); err != nil {
+		panic(err)
+	}
+	if err := viper.BindPFlag(configuration.ViperKeyIQServer, lookupFlagNotNil(flagNameIqServerUrl, cmd)); err != nil {
+		panic(err)
+	}
+}
+
+func lookupFlagNotNil(flagName string, cmd *cobra.Command) *pflag.Flag {
+	// see: https://github.com/spf13/viper/pull/949
+	foundFlag := cmd.Flags().Lookup(flagName)
+	if foundFlag == nil {
+		panic(fmt.Errorf("flag lookup for name: '%s' returned nil", flagName))
+	}
+	return foundFlag
+}
+
+func initIQConfig() {
+	var cfgFileToCheck string
+	if cfgFileIQ != "" {
+		viper.SetConfigFile(cfgFileIQ)
+		viper.SetConfigType(configuration.ConfigTypeYaml)
+		cfgFileToCheck = cfgFileIQ
+	} else {
+		home, err := homedir.Dir()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		configPath := path.Join(home, types.IQServerDirName)
+
+		viper.AddConfigPath(configPath)
+		viper.SetConfigType(configuration.ConfigTypeYaml)
+		viper.SetConfigName(types.IQServerConfigFileName)
+
+		cfgFileToCheck = path.Join(configPath, types.IQServerConfigFileName)
+	}
+
+	if fileExists(cfgFileToCheck) {
+		// 'merge' IQ config here, since we also need OSSI config, and load order is not guaranteed
+		if err := viper.MergeInConfig(); err != nil {
+			panic(err)
+		}
+	}
 }

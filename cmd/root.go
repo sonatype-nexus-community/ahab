@@ -17,7 +17,13 @@
 package cmd
 
 import (
+	"fmt"
+	"github.com/mitchellh/go-homedir"
+	"github.com/sonatype-nexus-community/go-sona-types/configuration"
+	"github.com/sonatype-nexus-community/go-sona-types/ossindex/types"
+	"github.com/spf13/viper"
 	"os"
+	"path"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -41,4 +47,60 @@ func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
+}
+
+func init() {
+	cobra.OnInitialize(initConfig)
+
+	pf := rootCmd.PersistentFlags()
+	pf.StringVarP(&ossIndexUser, flagNameOssiUsername, "u", "", "Specify your OSS Index Username")
+	pf.StringVarP(&ossIndexToken, flagNameOssiToken, "t", "", "Specify your OSS Index API Token")
+}
+
+func initConfig() {
+	var cfgFileToCheck string
+	if cfgFile != "" {
+		viper.SetConfigFile(cfgFile)
+		viper.SetConfigType(configuration.ConfigTypeYaml)
+		cfgFileToCheck = cfgFile
+	} else {
+		home, err := homedir.Dir()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		configPath := path.Join(home, types.OssIndexDirName)
+
+		viper.AddConfigPath(configPath)
+		viper.SetConfigType(configuration.ConfigTypeYaml)
+		viper.SetConfigName(types.OssIndexConfigFileName)
+
+		cfgFileToCheck = path.Join(configPath, types.OssIndexConfigFileName)
+	}
+
+	if fileExists(cfgFileToCheck) {
+		// 'merge' OSSI config here, since IQ cmd also need OSSI config, and init order is not guaranteed
+		if err := viper.MergeInConfig(); err != nil {
+			panic(err)
+		}
+	}
+}
+
+func fileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
+}
+
+func cleanUserName(origUsername string) string {
+	runes := []rune(origUsername)
+	cleanUsername := "***hidden***"
+	if len(runes) > 0 {
+		first := string(runes[0])
+		last := string(runes[len(runes)-1])
+		cleanUsername = first + "***hidden***" + last
+	}
+	return cleanUsername
 }

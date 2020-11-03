@@ -45,7 +45,7 @@ func TestChaseCommandApkInvalidStdInText(t *testing.T) {
 
 func TestChaseCommandBadUserAndToken(t *testing.T) {
 	// FAKE alpine package should avoid test failure due to cached package
-	oldStdIn, tmpFile := createFakeStdInWithString(t, "FAKEalpine-baselayout-3.1.2-r0 - Alpine base dir structure and init scripts")
+	oldStdIn, tmpFile := createFakeStdInWithString(t, "FAKE__alpine-baselayout-3.1.2-r0 - Alpine base dir structure and init scripts")
 	defer func() {
 		os.Stdin = oldStdIn
 		_ = tmpFile.Close()

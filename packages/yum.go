@@ -19,6 +19,7 @@ package packages
 import (
 	"fmt"
 
+	"github.com/DarthHater/packageurl-go"
 	"github.com/sonatype-nexus-community/ahab/parse"
 )
 
@@ -29,6 +30,17 @@ type Yum struct {
 func (y Yum) ExtractPurlsFromProjectList() (purls []string) {
 	for _, s := range y.ProjectList.Projects {
 		var purl = fmt.Sprintf("pkg:rpm/%s@%s", s.Name, s.Version)
+		purls = append(purls, purl)
+	}
+	return
+}
+
+func (y Yum) ExtractPurlObjectsFromProjectList() (purls []packageurl.PackageURL) {
+	for _, s := range y.ProjectList.Projects {
+		purl, err := packageurl.FromString(fmt.Sprintf("pkg:rpm/%s@%s", s.Name, s.Version))
+		if err != nil {
+			continue
+		}
 		purls = append(purls, purl)
 	}
 	return

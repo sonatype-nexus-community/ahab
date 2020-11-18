@@ -16,6 +16,9 @@
 
 package packages
 
+import "github.com/DarthHater/packageurl-go"
+
 type IPackage interface {
 	ExtractPurlsFromProjectList() []string
+	ExtractPurlObjectsFromProjectList() []packageurl.PackageURL
 }

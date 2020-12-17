@@ -260,6 +260,20 @@ $ make build
 
 Tests can be run like `make test`
 
+### Release Process
+
+Follow the steps below to release a new version of Nancy. You need to be part of the `deploy from circle ci` group for this to work.
+
+1. Checkout/pull the latest `master` branch, and create a new tag with the desired semantic version and a helpful note:
+
+       git tag -a v0.2.x -m "Helpful message in tag."
+
+2. Push the tag up:
+
+       git push origin v0.2.x
+
+3. There is no step 3.
+
 ## Contributing
 
 We care a lot about making the world a safer place, and that's why we created `ahab`. If you as well want to

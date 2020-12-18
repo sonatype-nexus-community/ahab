@@ -29,6 +29,8 @@ func ParseYumListFromStdIn(stdin []string) (projectList ProjectList) {
 			log.Println("Skipping loaded plugins")
 		} else if strings.TrimSpace(pkg) == "Installed Packages" {
 			log.Println("Found beginning line of Yum Install List")
+		} else if len(strings.Fields(pkg)) < 3 {
+			log.Println("Skipping malformed package:", pkg)
 		} else {
 			projectList.Projects = append(projectList.Projects, doYumParseStdIn(pkg))
 		}

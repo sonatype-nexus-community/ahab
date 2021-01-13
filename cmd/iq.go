@@ -18,13 +18,14 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"path"
+
 	"github.com/mitchellh/go-homedir"
 	"github.com/sonatype-nexus-community/ahab/internal/customerrors"
 	"github.com/sonatype-nexus-community/go-sona-types/configuration"
 	"github.com/sonatype-nexus-community/go-sona-types/ossindex/types"
 	"github.com/spf13/viper"
-	"os"
-	"path"
 
 	"github.com/sonatype-nexus-community/ahab/buildversion"
 	"github.com/sonatype-nexus-community/ahab/packages"
@@ -156,9 +157,12 @@ var iqCmd = &cobra.Command{
 			panic(err)
 		}
 
-		purls := pkgs.ExtractPurlsFromProjectList()
+		purls := pkgs.ExtractPurlObjectsFromProjectList()
 
-		res, err := lifecycle.AuditPackages(purls)
+		hashbrowns := packages.New(logLady)
+		hashbrowns.PopulateListOfHashes(os.Getenv("PATH"))
+
+		res, err := lifecycle.Audit(purls, hashbrowns.Files)
 		if err != nil {
 			logLady.Error(err)
 			panic(err)

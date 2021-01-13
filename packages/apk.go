@@ -19,6 +19,7 @@ package packages
 import (
 	"fmt"
 
+	"github.com/DarthHater/packageurl-go"
 	"github.com/sonatype-nexus-community/ahab/parse"
 )
 
@@ -29,6 +30,17 @@ type Apk struct {
 func (a Apk) ExtractPurlsFromProjectList() (purls []string) {
 	for _, s := range a.ProjectList.Projects {
 		var purl = fmt.Sprintf("pkg:alpine/%s@%s", s.Name, s.Version)
+		purls = append(purls, purl)
+	}
+	return
+}
+
+func (a Apk) ExtractPurlObjectsFromProjectList() (purls []packageurl.PackageURL) {
+	for _, s := range a.ProjectList.Projects {
+		purl, err := packageurl.FromString(fmt.Sprintf("pkg:alpine/%s@%s", s.Name, s.Version))
+		if err != nil {
+			continue
+		}
 		purls = append(purls, purl)
 	}
 	return

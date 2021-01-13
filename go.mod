@@ -3,13 +3,15 @@ module github.com/sonatype-nexus-community/ahab
 go 1.14
 
 require (
+	github.com/DarthHater/packageurl-go v0.1.1-0.20201022013050-2ab9db397c59
 	github.com/common-nighthawk/go-figure v0.0.0-20200609044655-c4b36f998cf2
 	github.com/jedib0t/go-pretty/v6 v6.0.5
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/package-url/packageurl-go v0.1.0 // indirect
 	github.com/shopspring/decimal v1.2.0
 	github.com/sirupsen/logrus v1.7.0
-	github.com/sonatype-nexus-community/go-sona-types v0.0.8
+	github.com/sonatype-nexus-community/go-sona-types v0.0.9-0.20201118200801-791b1ec93137
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.7.1

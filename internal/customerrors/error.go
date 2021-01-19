@@ -45,5 +45,5 @@ func getLogFileMessage() string {
 	}
 
 	return fmt.Sprintf("For more information, check the log file at %s\n"+
-		"nancy version: %s\n", logFile, buildversion.BuildVersion)
+		"ahab version: %s\n", logFile, buildversion.BuildVersion)
 }

@@ -17,14 +17,19 @@
 package cmd
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
+	"github.com/sirupsen/logrus/hooks/test"
 	"github.com/sonatype-nexus-community/go-sona-types/configuration"
+	"github.com/sonatype-nexus-community/go-sona-types/iq"
 	"github.com/sonatype-nexus-community/go-sona-types/ossindex/types"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"os"
 	"path"
+	"strings"
 	"testing"
 )
 
@@ -125,4 +130,20 @@ func TestInitIQConfigWithNoConfigFile(t *testing.T) {
 	assert.Equal(t, "", viper.GetString(configuration.ViperKeyIQUsername))
 	assert.Equal(t, "", viper.GetString(configuration.ViperKeyIQToken))
 	assert.Equal(t, "", viper.GetString(configuration.ViperKeyIQServer))
+}
+
+func Test_showPolicyActionMessage(t *testing.T) {
+	logLady, _ = test.NewNullLogger()
+	verifyReportURL(t, "anythingElse") //default policy action
+	verifyReportURL(t, iq.PolicyActionWarning)
+	verifyReportURL(t, iq.PolicyActionFailure)
+}
+
+func verifyReportURL(t *testing.T, policyAction string) {
+	var buf bytes.Buffer
+	bufWriter := bufio.NewWriter(&buf)
+	theURL := "someURL"
+	showPolicyActionMessage(iq.StatusURLResult{AbsoluteReportHTMLURL: theURL, PolicyAction: policyAction}, bufWriter)
+	bufWriter.Flush()
+	assert.True(t, strings.Contains(buf.String(), "Report URL:  "+theURL), buf.String())
 }

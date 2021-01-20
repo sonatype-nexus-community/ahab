@@ -23,6 +23,7 @@ import (
 	"github.com/sonatype-nexus-community/go-sona-types/configuration"
 	"github.com/sonatype-nexus-community/go-sona-types/ossindex/types"
 	"github.com/spf13/viper"
+	"io"
 	"os"
 	"path"
 
@@ -170,19 +171,30 @@ var iqCmd = &cobra.Command{
 			panic(fmt.Errorf("Uh oh! There was an error with your request to Nexus IQ Server"))
 		}
 
-		if res.PolicyAction == "Failure" {
-			logLady.WithField("res", res).Debug("Successful in communicating with IQ Server")
-			fmt.Println("Ahoy, Ahab here matey, avast ye work, ye have some policy violations to clean up!")
-			fmt.Println("Report URL: ", res.ReportHTMLURL)
+		showPolicyActionMessage(res, os.Stdout)
+		if res.PolicyAction == iq.PolicyActionFailure {
 			os.Exit(1)
 			return
 		}
-
-		logLady.WithField("res", res).Debug("Successful in communicating with IQ Server")
-		fmt.Println("Wonderbar! No policy violations reported for this audit!")
-		fmt.Println("Report URL: ", res.ReportHTMLURL)
 		return
 	},
+}
+
+func showPolicyActionMessage(res iq.StatusURLResult, writer io.Writer) {
+	switch res.PolicyAction {
+	case iq.PolicyActionFailure:
+		logLady.WithField("res", res).Debug("Successful in communicating with IQ Server")
+		_, _ = fmt.Fprintln(writer, "Ahoy, Ahab here matey, avast ye work, ye have some policy violations to clean up!")
+		_, _ = fmt.Fprintln(writer, "Report URL: ", res.AbsoluteReportHTMLURL)
+	case iq.PolicyActionWarning:
+		logLady.WithField("res", res).Debug("Successful in communicating with IQ Server")
+		_, _ = fmt.Fprintln(writer, "A shot across the bow, there be policy warnings!")
+		_, _ = fmt.Fprintln(writer, "Report URL: ", res.AbsoluteReportHTMLURL)
+	default:
+		logLady.WithField("res", res).Debug("Successful in communicating with IQ Server")
+		_, _ = fmt.Fprintln(writer, "Wonderbar! No policy violations reported for this audit!")
+		_, _ = fmt.Fprintln(writer, "Report URL: ", res.AbsoluteReportHTMLURL)
+	}
 }
 
 func bindViperIq(cmd *cobra.Command) {

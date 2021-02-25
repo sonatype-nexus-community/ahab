@@ -16,7 +16,7 @@
 
 -->
 <p align="center">
-    <img src="https://github.com/sonatype-nexus-community/ahab/blob/master/docs/images/ahab.png" width="350"/>
+    <img src="https://github.com/sonatype-nexus-community/ahab/blob/main/docs/images/ahab.png" width="350"/>
 </p>
 <p align="center">
     <a href="https://circleci.com/gh/sonatype-nexus-community/ahab"><img src="https://circleci.com/gh/sonatype-nexus-community/ahab.svg?style=shield" alt="Circle CI Build Status"></img></a>
@@ -264,7 +264,7 @@ Tests can be run like `make test`
 
 Follow the steps below to release a new version of Nancy. You need to be part of the `deploy from circle ci` group for this to work.
 
-1. Checkout/pull the latest `master` branch, and create a new tag with the desired semantic version and a helpful note:
+1. Checkout/pull the latest `main` branch, and create a new tag with the desired semantic version and a helpful note:
 
        git tag -a v0.2.x -m "Helpful message in tag."
 

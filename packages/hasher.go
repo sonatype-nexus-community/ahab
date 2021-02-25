@@ -22,10 +22,10 @@ func New(logLady *logrus.Logger) *Hasher {
 
 func (h Hasher) PopulateListOfHashes(path string) {
 	for _, v := range filepath.SplitList(path) {
-		err := filepath.Walk(v, func(path string, f os.FileInfo, err error) error {
-			err = h.getHashAndAppend(path)
-			if err != nil {
-				return err
+		err := filepath.Walk(v, func(path string, f os.FileInfo, err error) (hashErr error) {
+			hashErr = h.getHashAndAppend(path)
+			if hashErr != nil {
+				return hashErr
 			}
 			return nil
 		})
@@ -37,12 +37,11 @@ func (h Hasher) PopulateListOfHashes(path string) {
 
 func (h *Hasher) getHashAndAppend(path string) (err error) {
 	f, err := os.Open(path)
-
-	defer f.Close()
-
 	if err != nil {
 		return err
 	}
+	defer f.Close()
+
 	hashString, err := h.getSha1(f)
 	if err != nil {
 		return err

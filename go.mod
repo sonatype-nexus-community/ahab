@@ -16,8 +16,6 @@ require (
 	github.com/stretchr/testify v1.6.1
 )
 
-replace golang.org/x/text => golang.org/x/text v0.3.3
-
 // fix vulnerability: CVE-2020-15114 in etcd v3.3.13+incompatible
 replace github.com/coreos/etcd => github.com/coreos/etcd v3.3.24+incompatible
 

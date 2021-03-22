@@ -1,3 +1,4 @@
+.PHONY: all deps test lint ci-lint build
 # Go parameters
 GO_BUILD_FLAGS=GO111MODULE=on CGO_ENABLED=0
 GOCMD=go

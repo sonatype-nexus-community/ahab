@@ -1,6 +1,6 @@
 module github.com/sonatype-nexus-community/ahab
 
-go 1.14
+go 1.16
 
 require (
 	github.com/common-nighthawk/go-figure v0.0.0-20200609044655-c4b36f998cf2
@@ -15,12 +15,6 @@ require (
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.6.1
 )
-
-replace github.com/gorilla/websocket => github.com/gorilla/websocket v1.4.2
-
-replace golang.org/x/crypto => golang.org/x/crypto v0.0.0-20200604202706-70a84ac30bf9
-
-replace golang.org/x/text => golang.org/x/text v0.3.3
 
 // fix vulnerability: CVE-2020-15114 in etcd v3.3.13+incompatible
 replace github.com/coreos/etcd => github.com/coreos/etcd v3.3.24+incompatible

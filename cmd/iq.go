@@ -61,7 +61,7 @@ func init() {
 	pf.StringVar(&packageManager, "package-manager", "", "Specify package manager type you want to scan (apk, dnf, dpkg or yum). Useful if autodetection fails and/or you want to explicitly set it.")
 	pf.StringVarP(&iqUsername, flagNameIqUsername, "l", "admin", "Specify Nexus IQ Username for request")
 	pf.StringVarP(&iqToken, flagNameIqToken, "k", "admin123", "Specify Nexus IQ Token/Password for request")
-	pf.StringVarP(&iqHost, flagNameIqServerUrl, "x", "http://localhost:8070", "Specify Nexus IQ Server URL")
+	pf.StringVarP(&iqHost, flagNameIqServerUrl, "x", "http://host.docker.internal:8070", "Specify Nexus IQ Server URL")
 	pf.BoolVar(&quiet, "quiet", true, "Quiet removes the header from being printed")
 
 	pf.StringVarP(&application, flagNameIqApplication, "a", "", "Specify public application ID for request (required)")

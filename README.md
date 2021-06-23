@@ -219,7 +219,7 @@ Flags:
   -v, -- count                   Set log level, higher is more verbose
   -h, --help                     help for iq
   -a, --iq-application string    Specify public application ID for request (required)
-  -x, --iq-server-url string     Specify Nexus IQ Server URL (default "http://localhost:8070")
+  -x, --iq-server-url string     Specify Nexus IQ Server URL (default "http://host.docker.internal:8070")
   -s, --iq-stage string          Specify stage for application (default "develop")
   -k, --iq-token string          Specify Nexus IQ Token/Password for request (default "admin123")
   -l, --iq-username string       Specify Nexus IQ Username for request (default "admin")

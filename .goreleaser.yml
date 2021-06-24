@@ -37,7 +37,7 @@ builds:
 archives:
   -
     id: default
-    name_template: "{{ .ProjectName }}-{{ .Os }}.{{ .Arch }}-v{{ .Version }}"
+    name_template: "{{ .ProjectName }}-v{{ .Version }}-{{ .Os }}-{{ .Arch }}"
     format: binary
   
 checksum:

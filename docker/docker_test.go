@@ -43,7 +43,7 @@ func TestDockerIntegration(t *testing.T) {
 			test := test
 			t.Run(name, func(t *testing.T) {
 				t.Parallel()
-				t.Logf(">>>>>>>>>>>>>> %v: Started",name)
+				t.Logf(">>>>>>>>>>>>>> %v: Started", name)
 				t.Logf(">>>>>>>>>>>>>> %v: %v", name, test.expectedDockerfile)
 				output, status := runCommand("docker", "build", "--no-cache", "-f", test.expectedDockerfile, ".")
 				t.Logf(">>>>>>>>>>>>>> %v: %v", name, output)
@@ -80,6 +80,8 @@ func runCommand(command string, args ...string) (output string, status bool) {
 	cmd.Env = append(cmd.Env, "CGO_ENABLED=0")
 	cmd.Env = append(cmd.Env, "GOOS=linux")
 	cmd.Env = append(cmd.Env, "GOARCH=amd64")
+	// 'DOCKER_BUILDKIT=0' fixes errors like this: `#10 2.350 [output clipped, log limit 100KiB/s reached]`
+	cmd.Env = append(cmd.Env, "DOCKER_BUILDKIT=0")
 
 	var waitStatus syscall.WaitStatus
 	combinedOutput, err := cmd.CombinedOutput()

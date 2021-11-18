@@ -9,15 +9,9 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/shopspring/decimal v1.2.0
 	github.com/sirupsen/logrus v1.7.0
-	github.com/sonatype-nexus-community/go-sona-types v0.0.10
+	github.com/sonatype-nexus-community/go-sona-types v0.1.3
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.6.1
 )
-
-// fix vulnerability: CVE-2020-15114 in etcd v3.3.13+incompatible
-replace github.com/coreos/etcd => github.com/coreos/etcd v3.3.24+incompatible
-
-// fix vulnerability: CVE-2021-3121 in github.com/gogo/protobuf v1.2.1
-replace github.com/gogo/protobuf => github.com/gogo/protobuf v1.3.2

@@ -1,4 +1,4 @@
-FROM centos:latest
+FROM quay.io/centos/centos:stream
 
 WORKDIR /ahab-docker
 

@@ -21,3 +21,6 @@ replace github.com/coreos/etcd => github.com/coreos/etcd v3.3.24+incompatible
 
 // fix vulnerability: CVE-2021-3121 in github.com/gogo/protobuf v1.2.1
 replace github.com/gogo/protobuf => github.com/gogo/protobuf v1.3.2
+
+// fix vulnerability: CVE-2022-21698 in github.com/prometheus/client_golang v0.9.3
+replace github.com/prometheus/client_golang => github.com/prometheus/client_golang v1.11.1

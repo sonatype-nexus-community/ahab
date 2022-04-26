@@ -2,9 +2,11 @@ FROM ubuntu:latest
 
 WORKDIR /ahab-docker
 
-RUN apt-get update && apt-get -y install python3-pip
+RUN apt-get update && apt-get -y install python3-pip sudo
 
 COPY ahab .
+
+RUN sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 871920D1991BC93C
 
 # Spit out these just for easier debugging
 RUN dpkg-query --show --showformat='${Package} ${Version}\n'

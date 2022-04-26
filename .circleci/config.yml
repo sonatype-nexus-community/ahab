@@ -17,7 +17,7 @@ version: 2.1
 executors:
   go:
     docker:
-      - image: circleci/golang:1.16
+      - image: cimg/go:1.17
 
 jobs:
   release:
@@ -30,7 +30,6 @@ jobs:
     environment:
       GO111MODULE: "on"
       TEST_RESULTS: /tmp/test-results
-    working_directory: /go/src/github.com/sonatype-nexus-community/ahab
     steps:
       - setup_remote_docker
       - checkout
@@ -38,8 +37,8 @@ jobs:
       - restore_cache:
           keys:
             - go-mod-v1-{{ checksum "go.sum" }}
-      - run: go get -u github.com/jstemmer/go-junit-report
-      - run: go get -u github.com/sonatype-nexus-community/nancy
+      - run: go install github.com/jstemmer/go-junit-report@latest
+      - run: go install github.com/sonatype-nexus-community/nancy@latest
       - run: make deps
       - run: go list -json -deps | nancy sleuth
       - run: make ci-lint

@@ -1,17 +1,8 @@
-FROM ubuntu:latest
+FROM ubuntu:focal
 
 WORKDIR /ahab-docker
 
-RUN apt-get update || true
-#RUN apt-get install -y gnupg
-#RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 871920D1991BC93C
-#RUN apt-get update
-#RUN chmod 666 /etc/apt/trusted.gpg.d/ubuntu-keyring-2012-cdimage.gpg
-#RUN chmod 666 /etc/apt/trusted.gpg.d/ubuntu-keyring-2018-archive.gpg
-#RUN apt-get update & apt-get install -y gnupg
-#RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 871920D1991BC93C
-#RUN apt-get --allow-unauthenticated update && apt-get -y install python3-pip
-RUN apt-get --allow-unauthenticated -y install python3-pip
+RUN apt-get update && apt-get -y install python3-pip
 
 COPY ahab .
 

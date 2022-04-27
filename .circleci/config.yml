@@ -18,6 +18,8 @@ executors:
   go:
     docker:
       - image: cimg/go:1.17
+#        uncomment line below for workaround to run docker integration tests on mac-os locally. see: https://stackoverflow.com/questions/45796661/docker-permission-denied-while-trying-to-connect-to-docker-daemon-with-local-ci/45796662#45796662
+#        user: root
 
 jobs:
   release:

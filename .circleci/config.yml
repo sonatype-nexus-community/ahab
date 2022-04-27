@@ -42,6 +42,7 @@ jobs:
       - run: make deps
       - run: go list -json -deps | nancy sleuth
       - run: make ci-lint
+      - run: make test
       - run: make test | go-junit-report -set-exit-code > $TEST_RESULTS/gotest/report.xml
       - save_cache:
           key: go-mod-v1-{{ checksum "go.sum" }}

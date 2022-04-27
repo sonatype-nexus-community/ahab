@@ -1,3 +1,5 @@
+# maybe go back to "latest" after "jammy" is stable
+#FROM ubuntu:latest
 FROM ubuntu:focal
 
 WORKDIR /ahab-docker

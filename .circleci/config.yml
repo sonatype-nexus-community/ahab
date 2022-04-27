@@ -42,6 +42,7 @@ jobs:
       - run: make deps
       - run: go list -json -deps | nancy sleuth
       - run: make ci-lint
+#     'make test' alone shows more output when DockerIntegration tests fail, otherwise, normally not needed.
       - run: make test
       - run: make test | go-junit-report -set-exit-code > $TEST_RESULTS/gotest/report.xml
       - save_cache:

@@ -2,6 +2,7 @@ FROM ubuntu:latest
 
 WORKDIR /ahab-docker
 
+RUN apt-get install -y gnupg
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 871920D1991BC93C
 RUN apt-get update && apt-get -y install python3-pip
 

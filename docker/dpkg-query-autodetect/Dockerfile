@@ -2,7 +2,8 @@ FROM ubuntu:latest
 
 WORKDIR /ahab-docker
 
-RUN apt-get update --allow-unauthenticated
+RUN sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 871920D1991BC93C
+RUN apt-get update
 RUN chmod 666 /etc/apt/trusted.gpg.d/ubuntu-keyring-2012-cdimage.gpg
 RUN chmod 666 /etc/apt/trusted.gpg.d/ubuntu-keyring-2018-archive.gpg
 #RUN apt-get update & apt-get install -y gnupg

@@ -27,7 +27,7 @@ dockerizedBuildPipeline(
 //    '''
 //    },
     // Avoid 'test' target for now due to docker calls having issues on Jenkins
-    build: {
+    buildAndTest: {
       sh '''
       make deps lint build
     '''

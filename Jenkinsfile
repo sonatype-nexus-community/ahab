@@ -45,7 +45,7 @@ dockerizedBuildPipeline(
     },
     onFailure: {
       githubStatusUpdate('failure')
-//      notifyChat(currentBuild: currentBuild, env: env, room: 'community-oss-fun')
-//      sendEmailNotification(currentBuild, env, [], 'community-group@sonatype.com')
+      notifyChat(currentBuild: currentBuild, env: env, room: 'community-oss-fun')
+      sendEmailNotification(currentBuild, env, [], 'community-group@sonatype.com')
     }
 )

@@ -26,10 +26,10 @@ dockerizedBuildPipeline(
 //    make all
 //    '''
 //    },
-    // Avoid 'test' target for now due to docker calls having issues on Jenkins
+    // Avoid 'test', 'lint' targets for now due to docker calls having issues on Jenkins
     buildAndTest: {
       sh '''
-      make deps lint build
+      make deps build
     '''
     },
     vulnerabilityScan: {

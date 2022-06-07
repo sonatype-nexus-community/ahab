@@ -1,0 +1,6 @@
+<excludes>
+  <exclude>src/.github/**</exclude>
+  <exclude>src/Makefile</exclude>
+  <exclude>src/SECURITY.md</exclude>
+  <exclude>src/node_modules/**</exclude>
+</excludes>

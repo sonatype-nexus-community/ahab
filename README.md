@@ -25,6 +25,8 @@
     <a href="https://depshield.github.io"><img src="https://depshield.sonatype.org/badges/sonatype-nexus-community/ahab/depshield.svg" alt="DepShield Badge"></img></a>
 </p>
 
+## *Note:* `ahab` will soon be sailing into the sunset. See: [OSS Index Updates](https://ossindex.sonatype.org/updates-notice) for details.
+
 # Ahab
 
 `ahab` is a tool to check for vulnerabilities in your apt, apk, yum or dnf powered operating systems, powered by [Sonatype OSS Index](https://ossindex.sonatype.org/).

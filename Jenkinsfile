@@ -34,9 +34,9 @@ dockerizedBuildPipeline(
     },
     vulnerabilityScan: {
       withDockerImage(env.DOCKER_IMAGE_ID, {
-        withCredentials([usernamePassword(credentialsId: 'jenkins-iq',
+        withCredentials([usernamePassword(credentialsId: 'jenkins-community-iq',
             usernameVariable: 'IQ_USERNAME', passwordVariable: 'IQ_PASSWORD')]) {
-          sh 'go list -json -deps | /tmp/tools/nancy iq --iq-application ahab --iq-stage release --iq-username $IQ_USERNAME --iq-token $IQ_PASSWORD --iq-server-url https://iq.sonatype.dev'
+          sh 'go list -json -deps | /tmp/tools/nancy iq --iq-application ahab --iq-stage release --iq-username $IQ_USERNAME --iq-token $IQ_PASSWORD --iq-server-url https://sonatype-community-app.cloud.sonatype.com'
         }
       })
     },

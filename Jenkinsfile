@@ -16,7 +16,6 @@
 @Library(['private-pipeline-library', 'jenkins-shared']) _
 
 dockerizedBuildPipeline(
-    agentLabel: 'ubuntu-zion-legacy',
     pathToDockerfile: "jenkins.dockerfile",
     deployBranch: 'main',
     prepare: {

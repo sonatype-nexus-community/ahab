@@ -26,4 +26,5 @@ replace github.com/gogo/protobuf => github.com/gogo/protobuf v1.3.2
 replace github.com/prometheus/client_golang => github.com/prometheus/client_golang v1.11.1
 
 // fix vulnerability: CVE-2021-38561 in golang.org/x/text v0.3.3
-replace golang.org/x/text => golang.org/x/text v0.3.7
+// fix vulnerability: CVE-2022-32149 in golang.org/x/text v0.3.7
+replace golang.org/x/text => golang.org/x/text v0.3.8

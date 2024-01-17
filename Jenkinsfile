@@ -18,9 +18,6 @@
 dockerizedBuildPipeline(
     pathToDockerfile: "jenkins.dockerfile",
     deployBranch: 'main',
-    prepare: {
-      githubStatusUpdate('pending')
-    },
 //    buildAndTest: {
 //      sh '''
 //    make all
@@ -40,11 +37,7 @@ dockerizedBuildPipeline(
         }
       })
     },
-    onSuccess: {
-      githubStatusUpdate('success')
-    },
     onFailure: {
-      githubStatusUpdate('failure')
       notifyChat(currentBuild: currentBuild, env: env, room: 'community-oss-fun')
       sendEmailNotification(currentBuild, env, [], 'community-group@sonatype.com')
     }

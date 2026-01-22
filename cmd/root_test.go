@@ -104,6 +104,26 @@ func TestInitConfigWithNoConfigFile(t *testing.T) {
 	assert.Equal(t, "", viper.GetString(configuration.ViperKeyToken))
 }
 
+func TestInitConfigWithURL(t *testing.T) {
+	viper.Reset()
+	defer viper.Reset()
+
+	tempDir := setupConfig(t)
+	defer resetConfig(t, tempDir)
+
+	testURL := "https://custom.ossindex.sonatype.org/api/v3/component-report"
+	setupTestOSSIConfigFileWithURL(t, tempDir, testURL)
+	defer func() {
+		resetOSSIConfigFile()
+	}()
+
+	initConfig()
+
+	assert.Equal(t, "ossiUsernameValue", viper.GetString(configuration.ViperKeyUsername))
+	assert.Equal(t, "ossiTokenValue", viper.GetString(configuration.ViperKeyToken))
+	assert.Equal(t, testURL, viper.GetString(viperKeyOSSIndexURL))
+}
+
 func setupTestOSSIConfigFile(t *testing.T, tempDir string) {
 	cfgDir := path.Join(tempDir, types.OssIndexDirName)
 	assert.Nil(t, os.Mkdir(cfgDir, 0700))
@@ -121,6 +141,16 @@ func setupTestOSSIConfigFileValues(t *testing.T, tempDir string) {
 	const credentials = "ossi:\n" +
 		"  Username: ossiUsernameValue\n" +
 		"  Token: ossiTokenValue"
+	assert.Nil(t, ioutil.WriteFile(cfgFile, []byte(credentials), 0644))
+}
+
+func setupTestOSSIConfigFileWithURL(t *testing.T, tempDir string, url string) {
+	setupTestOSSIConfigFile(t, tempDir)
+
+	credentials := "ossi:\n" +
+		"  Username: ossiUsernameValue\n" +
+		"  Token: ossiTokenValue\n" +
+		"  URL: " + url
 	assert.Nil(t, ioutil.WriteFile(cfgFile, []byte(credentials), 0644))
 }
 

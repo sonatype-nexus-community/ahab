@@ -133,7 +133,7 @@ var chaseCmd = &cobra.Command{
 				TTL:         time.Now().Local().Add(time.Hour * 12),
 				Tool:        "ahab-client",
 				Version:     buildversion.BuildVersion,
-				OSSIndexURL: ossIndexURL,
+				OSSIndexURL: viper.GetString(viperKeyOSSIndexURL),
 				Username:    viper.GetString(configuration.ViperKeyUsername),
 				Token:       viper.GetString(configuration.ViperKeyToken),
 			})
@@ -206,6 +206,8 @@ var chaseCmd = &cobra.Command{
 const (
 	flagNameOssiUsername = "username"
 	flagNameOssiToken    = "token"
+	flagNameOssiURL      = "url"
+	viperKeyOSSIndexURL  = "ossi.URL"
 )
 
 func bindViperRootCmd() {
@@ -216,6 +218,9 @@ func bindViperRootCmd() {
 		panic(err)
 	}
 	if err := viper.BindPFlag(configuration.ViperKeyToken, lookupPersistentFlagNotNil(flagNameOssiToken, rootCmd)); err != nil {
+		panic(err)
+	}
+	if err := viper.BindPFlag(viperKeyOSSIndexURL, lookupPersistentFlagNotNil(flagNameOssiURL, rootCmd)); err != nil {
 		panic(err)
 	}
 }

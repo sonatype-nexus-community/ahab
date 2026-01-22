@@ -19,6 +19,7 @@ package cmd
 import (
 	"encoding/json"
 	"github.com/sonatype-nexus-community/go-sona-types/ossindex/types"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -48,10 +49,10 @@ func TestChaseCommandApkInvalidStdInText(t *testing.T) {
 		w.WriteHeader(http.StatusBadRequest)
 	}))
 	defer ts.Close()
-	origOssIndexURL := ossIndexURL
-	ossIndexURL = ts.URL
+	origOssIndexURL := viper.GetString(viperKeyOSSIndexURL)
+	viper.Set(viperKeyOSSIndexURL, ts.URL)
 	defer func() {
-		ossIndexURL = origOssIndexURL
+		viper.Set(viperKeyOSSIndexURL, origOssIndexURL)
 	}()
 
 	_, err := executeCommand(rootCmd, chaseCmd.Use, "--os", "apk")
@@ -77,10 +78,10 @@ func TestChaseCommandBadUserAndToken(t *testing.T) {
 		w.WriteHeader(http.StatusUnauthorized)
 	}))
 	defer ts.Close()
-	origOssIndexURL := ossIndexURL
-	ossIndexURL = ts.URL
+	origOssIndexURL := viper.GetString(viperKeyOSSIndexURL)
+	viper.Set(viperKeyOSSIndexURL, ts.URL)
 	defer func() {
-		ossIndexURL = origOssIndexURL
+		viper.Set(viperKeyOSSIndexURL, origOssIndexURL)
 	}()
 
 	// pass a specific package manager to avoid test behavior changes on different OSs.
@@ -109,10 +110,10 @@ func TestChaseCommandEmptyUserAndToken(t *testing.T) {
 		_, _ = w.Write(jsonCoordinates)
 	}))
 	defer ts.Close()
-	origOssIndexURL := ossIndexURL
-	ossIndexURL = ts.URL
+	origOssIndexURL := viper.GetString(viperKeyOSSIndexURL)
+	viper.Set(viperKeyOSSIndexURL, ts.URL)
 	defer func() {
-		ossIndexURL = origOssIndexURL
+		viper.Set(viperKeyOSSIndexURL, origOssIndexURL)
 	}()
 
 	// pass a specific package manager to avoid test behavior changes on different OSs.
@@ -121,6 +122,33 @@ func TestChaseCommandEmptyUserAndToken(t *testing.T) {
 }
 
 var expectedCoordinate types.Coordinate
+
+func TestChaseCommandWithURLFlag(t *testing.T) {
+	viper.Reset()
+	defer viper.Reset()
+
+	oldStdIn, tmpFile := createFakeStdInWithString(t, "alpine-baselayout-3.1.2-r0 - Alpine base dir structure and init scripts")
+	defer func() {
+		os.Stdin = oldStdIn
+		_ = tmpFile.Close()
+		_ = os.Remove(tmpFile.Name())
+	}()
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, http.MethodPost, r.Method)
+		assert.Equal(t, "/", r.URL.EscapedPath())
+
+		w.WriteHeader(http.StatusOK)
+		coordinates := []types.Coordinate{expectedCoordinate}
+		jsonCoordinates, _ := json.Marshal(coordinates)
+		_, _ = w.Write(jsonCoordinates)
+	}))
+	defer ts.Close()
+
+	// pass a specific package manager to avoid test behavior changes on different OSs.
+	_, err := executeCommand(rootCmd, chaseCmd.Use, "--url", ts.URL, "--os", "apk")
+	assert.Nil(t, err)
+}
 
 // TODO: Figure out why this test works when run by itself, but fails as part of test suite.
 // Manual testing confirms correct behavior
@@ -146,10 +174,10 @@ var expectedCoordinate types.Coordinate
 		_, _ = w.Write(jsonCoordinates)
 	}))
 	defer ts.Close()
-	origOssIndexURL := ossIndexURL
-	ossIndexURL = ts.URL
+	origOssIndexURL := viper.GetString(viperKeyOSSIndexURL)
+	viper.Set(viperKeyOSSIndexURL, ts.URL)
 	defer func() {
-		ossIndexURL = origOssIndexURL
+		viper.Set(viperKeyOSSIndexURL, origOssIndexURL)
 	}()
 
 	viper.Reset()

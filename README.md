@@ -122,10 +122,32 @@ Available Commands:
 Flags:
   -h, --help              help for ahab
   -t, --token string      Specify your OSS Index API Token
+      --url string        Specify your OSS Index URL
   -u, --username string   Specify your OSS Index Username
 
 Use "ahab [command] --help" for more information about a command.
 ```
+
+#### Configuring OSS Index URL
+
+By default, `ahab` uses the public OSS Index server at `https://ossindex.sonatype.org/api/v3/component-report`. If you need to use a different OSS Index server (such as a private instance), you can configure it in three ways:
+
+##### Via CLI flag
+```
+./ahab chase --url https://your-ossindex-server.com/api/v3/component-report
+```
+
+##### Via configuration file
+Add the URL to your `~/.ossindex/.oss-index-config` file:
+```yaml
+ossi:
+  Username: your-username
+  Token: your-token
+  URL: https://your-ossindex-server.com/api/v3/component-report
+```
+
+##### Via environment (through config file)
+You can also use the `ahab config` command to set up your credentials and URL interactively.
 
 #### OSS Index usage
 
@@ -159,6 +181,7 @@ Flags:
 
 Global Flags:
   -t, --token string      Specify your OSS Index API Token
+      --url string        Specify your OSS Index URL
   -u, --username string   Specify your OSS Index Username
 ```
 
@@ -232,6 +255,7 @@ Flags:
 
 Global Flags:
   -t, --token string      Specify your OSS Index API Token
+      --url string        Specify your OSS Index URL
   -u, --username string   Specify your OSS Index Username
 ```
 

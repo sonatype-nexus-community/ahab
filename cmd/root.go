@@ -55,6 +55,7 @@ func init() {
 	pf := rootCmd.PersistentFlags()
 	pf.StringVarP(&ossIndexUser, flagNameOssiUsername, "u", "", "Specify your OSS Index Username")
 	pf.StringVarP(&ossIndexToken, flagNameOssiToken, "t", "", "Specify your OSS Index API Token")
+	pf.StringVar(&ossIndexURL, flagNameOssiURL, "", "Specify your OSS Index URL")
 }
 
 func initConfig() {
